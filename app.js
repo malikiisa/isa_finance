@@ -12,9 +12,28 @@ let state = {
     currentPeriod: 'today'
 };
 
+let cache = {
+    transactions: null,
+    wallets: null,
+    categories: null,
+    dashboard: {}
+};
+const CACHE_DURATION = 2 * 60 * 1000; // 2 menit
+
 // ==========================================
 // UTILS & HELPER
 // ==========================================
+function toggleTheme() {
+    const html = document.documentElement;
+    if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        localStorage.theme = 'light';
+    } else {
+        html.classList.add('dark');
+        localStorage.theme = 'dark';
+    }
+}
+
 function formatIDR(amount) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
 }
@@ -57,6 +76,61 @@ function showToast(message, type = 'success') {
         toast.classList.add('translate-x-full', 'opacity-0');
         setTimeout(() => toast.remove(), 300);
     }, 3000);
+}
+
+function renderTxSkeleton(count = 3) {
+    return Array(count).fill(0).map(() => `
+        <div class="flex items-center justify-between p-3 border border-outline/10 dark:border-slate-700 rounded-xl bg-surface-container-lowest dark:bg-slate-800 animate-pulse">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-outline/10"></div>
+                <div>
+                    <div class="w-24 h-4 bg-outline/10 rounded mb-2"></div>
+                    <div class="w-32 h-3 bg-outline/10 rounded"></div>
+                </div>
+            </div>
+            <div class="w-20 h-5 bg-outline/10 rounded"></div>
+        </div>`).join('');
+}
+
+function renderWalletSkeleton(count = 3) {
+    return Array(count).fill(0).map(() => `
+        <div class="bg-surface-container-lowest dark:bg-slate-800 border border-outline/10 dark:border-slate-700 rounded-xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between animate-pulse">
+            <div class="flex items-start justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-outline/10"></div>
+                    <div>
+                        <div class="w-24 h-4 bg-outline/10 rounded mb-2"></div>
+                        <div class="w-12 h-3 bg-outline/10 rounded"></div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="w-20 h-3 bg-outline/10 rounded mb-2"></div>
+                <div class="w-32 h-6 bg-outline/10 rounded"></div>
+            </div>
+        </div>`).join('');
+}
+
+function renderDashboardWalletSkeleton(count = 2) {
+    return Array(count).fill(0).map(() => `
+        <div class="flex items-center justify-between p-3 border border-outline/10 dark:border-slate-700 rounded-xl animate-pulse">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-outline/10"></div>
+                <div class="w-24 h-4 bg-outline/10 rounded"></div>
+            </div>
+            <div class="w-20 h-4 bg-outline/10 rounded"></div>
+        </div>`).join('');
+}
+
+function renderCategorySkeleton(count = 3) {
+    return Array(count).fill(0).map(() => `
+        <div class="flex items-center justify-between p-3 border border-outline/10 dark:border-slate-700 rounded-xl animate-pulse">
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-outline/10"></div>
+                <div class="w-24 h-4 bg-outline/10 rounded"></div>
+            </div>
+            <div class="w-16 h-4 bg-outline/10 rounded"></div>
+        </div>`).join('');
 }
 
 // ==========================================
@@ -117,18 +191,18 @@ function navigateTo(pageId) {
     if (target) target.classList.add('active');
 
     // Update active nav buttons
-    document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(btn => btn.classList.remove('active', 'bg-surface-container', 'font-semibold', 'text-on-surface'));
+    document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(btn => btn.classList.remove('active', 'bg-surface-container', 'dark:bg-slate-600', 'font-semibold', 'text-on-surface', 'dark:text-slate-100'));
 
     // Desktop Nav
     document.querySelectorAll(`.nav-btn[data-target="${pageId}"]`).forEach(btn => {
-        btn.classList.add('active', 'bg-surface-container', 'font-semibold', 'text-on-surface');
-        btn.classList.remove('text-on-surface-variant');
+        btn.classList.add('active', 'bg-surface-container', 'dark:bg-slate-600', 'font-semibold', 'text-on-surface', 'dark:text-slate-100');
+        btn.classList.remove('text-on-surface-variant', 'dark:text-slate-400');
     });
 
     // Mobile Nav
     document.querySelectorAll(`.mobile-nav-btn[data-target="${pageId}"]`).forEach(btn => {
         btn.classList.add('active', 'text-primary'); // Changed to primary for contrast
-        btn.classList.remove('text-on-surface-variant');
+        btn.classList.remove('text-on-surface-variant', 'dark:text-slate-400');
     });
 
     // Update Mobile Title
@@ -217,10 +291,11 @@ async function init() {
         console.warn("API URL belum dikonfigurasi. Menggunakan data dummy.");
         setupDummyData();
     } else {
-        await Promise.all([
-            loadWalletsData(),
-            loadCategoriesData(),
-            loadTransactionsData()
+        // Prefetch data in background (doesn't block dashboard rendering)
+        Promise.all([
+            loadWalletsData(false),
+            loadCategoriesData(false),
+            loadTransactionsData(false)
         ]);
     }
 
@@ -229,9 +304,9 @@ async function init() {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.period-btn').forEach(b => {
                 b.classList.remove('bg-primary', 'text-white');
-                b.classList.add('bg-surface-container-low', 'text-on-surface-variant');
+                b.classList.add('bg-surface-container-low', 'dark:bg-slate-700', 'text-on-surface-variant', 'dark:text-slate-400');
             });
-            e.currentTarget.classList.remove('bg-surface-container-low', 'text-on-surface-variant');
+            e.currentTarget.classList.remove('bg-surface-container-low', 'dark:bg-slate-700', 'text-on-surface-variant', 'dark:text-slate-400');
             e.currentTarget.classList.add('bg-primary', 'text-white');
             state.currentPeriod = e.currentTarget.getAttribute('data-period');
             loadDashboard();
@@ -246,66 +321,106 @@ async function init() {
     navigateTo('dashboard');
 }
 
-async function loadTransactionsData() {
+async function loadTransactionsData(forceRefresh = false) {
+    if (!forceRefresh && cache.transactions && (Date.now() - cache.transactions < CACHE_DURATION)) return;
     const res = await apiGet('getTransactions');
     if (res && res.data) {
         state.transactions = res.data.map(mapTx);
+        cache.transactions = Date.now();
     }
 }
 
-async function loadWalletsData() {
+async function loadWalletsData(forceRefresh = false) {
+    if (!forceRefresh && cache.wallets && (Date.now() - cache.wallets < CACHE_DURATION)) return;
     const res = await apiGet('getWallets');
-    if (res && res.data) state.wallets = res.data.map(mapWallet);
+    if (res && res.data) {
+        state.wallets = res.data.map(mapWallet);
+        cache.wallets = Date.now();
+    }
 }
 
-async function loadCategoriesData() {
-    // Backend getCategories already returns both if no type is specified
+async function loadCategoriesData(forceRefresh = false) {
+    if (!forceRefresh && cache.categories && (Date.now() - cache.categories < CACHE_DURATION)) return;
     const res = await apiGet('getCategories');
     if (res && res.data) {
         state.categories = res.data.map(mapCategory);
+        cache.categories = Date.now();
     }
 }
 
-async function loadDashboard() {
+async function loadDashboard(forceRefresh = false) {
     if (API_BASE_URL.includes("MASUKKAN_URL")) {
         renderDashboardTransactions(state.transactions.slice(0, 5));
         renderDashboardWallets();
         return;
     }
 
+    const cacheKey = state.currentPeriod;
+    const isStale = !cache.dashboard[cacheKey] || (Date.now() - cache.dashboard[cacheKey].timestamp >= CACHE_DURATION);
+
+    if (!forceRefresh && !isStale) {
+        updateDashboardUI(cache.dashboard[cacheKey].data);
+        return;
+    }
+
+    if (!cache.dashboard[cacheKey]) {
+        document.getElementById('dashboard-transactions').innerHTML = renderTxSkeleton(3);
+        document.getElementById('dashboard-wallets').innerHTML = renderDashboardWalletSkeleton(2);
+    }
+
     const res = await apiGet('getDashboard', { period: state.currentPeriod });
     if (res && res.data) {
-        document.getElementById('metric-balance').textContent = formatIDR(res.data.totalBalance || 0);
-        document.getElementById('metric-income').textContent = formatIDR(res.data.totalIncome || 0);
-        document.getElementById('metric-expense').textContent = formatIDR(res.data.totalExpense || 0);
+        cache.dashboard[cacheKey] = { timestamp: Date.now(), data: res.data };
+        updateDashboardUI(res.data);
+    }
+}
 
-        const recentTx = (res.data.recentTransactions || []).map(mapTx);
-        renderDashboardTransactions(recentTx);
-        
-        if (res.data.wallets) {
-            state.wallets = res.data.wallets.map(mapWallet);
-        }
+function updateDashboardUI(data) {
+    document.getElementById('metric-balance').textContent = formatIDR(data.totalBalance || 0);
+    document.getElementById('metric-income').textContent = formatIDR(data.totalIncome || 0);
+    document.getElementById('metric-expense').textContent = formatIDR(data.totalExpense || 0);
+
+    const recentTx = (data.recentTransactions || []).map(mapTx);
+    renderDashboardTransactions(recentTx);
+    
+    if (data.wallets) {
+        state.wallets = data.wallets.map(mapWallet);
+        cache.wallets = Date.now();
     }
     renderDashboardWallets();
 }
 
-async function loadTransactions() {
+async function loadTransactions(forceRefresh = false) {
     if (!API_BASE_URL.includes("MASUKKAN_URL")) {
-        await loadTransactionsData();
+        const isStale = !cache.transactions || (Date.now() - cache.transactions >= CACHE_DURATION);
+        if (state.transactions.length === 0 && (forceRefresh || isStale)) {
+            document.getElementById('tx-list').innerHTML = renderTxSkeleton(5);
+        }
+        await loadTransactionsData(forceRefresh);
     }
     renderTransactions();
 }
 
-async function loadWallets() {
+async function loadWallets(forceRefresh = false) {
     if (!API_BASE_URL.includes("MASUKKAN_URL")) {
-        await loadWalletsData();
+        const isStale = !cache.wallets || (Date.now() - cache.wallets >= CACHE_DURATION);
+        if (state.wallets.length === 0 && (forceRefresh || isStale)) {
+            document.getElementById('wallets-grid').innerHTML = renderWalletSkeleton(3);
+        }
+        await loadWalletsData(forceRefresh);
     }
     renderWalletsGrid();
 }
 
-async function loadCategories() {
+async function loadCategories(forceRefresh = false) {
     if (!API_BASE_URL.includes("MASUKKAN_URL")) {
-        await loadCategoriesData();
+        const isStale = !cache.categories || (Date.now() - cache.categories >= CACHE_DURATION);
+        if (state.categories.length === 0 && (forceRefresh || isStale)) {
+            const skeleton = `<div class="flex flex-col gap-3">${renderCategorySkeleton(3)}</div>`;
+            document.getElementById('cat-income-list').innerHTML = skeleton;
+            document.getElementById('cat-expense-list').innerHTML = skeleton;
+        }
+        await loadCategoriesData(forceRefresh);
     }
     renderCategories();
 }
@@ -316,7 +431,7 @@ async function loadCategories() {
 function renderDashboardTransactions(txList) {
     const container = document.getElementById('dashboard-transactions');
     if (txList.length === 0) {
-        container.innerHTML = `<div class="p-4 text-center bg-surface-container-low/50 rounded-xl"><p class="text-sm text-on-surface-variant">Belum ada transaksi.</p></div>`;
+        container.innerHTML = `<div class="p-4 text-center bg-surface-container-low dark:bg-slate-700/50 rounded-xl"><p class="text-sm text-on-surface-variant dark:text-slate-400">Belum ada transaksi.</p></div>`;
         return;
     }
     container.innerHTML = txList.map(tx => {
@@ -340,14 +455,14 @@ function renderDashboardTransactions(txList) {
         const sign = isTransfer ? '' : (isIncome ? '+' : '-');
 
         return `
-        <div class="flex items-center justify-between p-3 border border-outline/10 rounded-xl bg-surface-container-low/30 hover:bg-surface-container-low transition-colors cursor-pointer" onclick="navigateTo('transactions')">
+        <div class="flex items-center justify-between p-3 border border-outline/10 dark:border-slate-700 rounded-xl bg-surface-container-low dark:bg-slate-700/30 hover:bg-surface-container-low dark:bg-slate-700 transition-colors cursor-pointer" onclick="navigateTo('transactions')">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full flex items-center justify-center ${bgIcon}">
                     <span class="material-symbols-outlined text-lg">${icon}</span>
                 </div>
                 <div>
                     <p class="font-medium text-sm line-clamp-1">${title}</p>
-                    <p class="text-xs text-on-surface-variant">${subtitle}</p>
+                    <p class="text-xs text-on-surface-variant dark:text-slate-400">${subtitle}</p>
                 </div>
             </div>
             <div class="text-right">
@@ -360,14 +475,14 @@ function renderDashboardTransactions(txList) {
 function renderDashboardWallets() {
     const container = document.getElementById('dashboard-wallets');
     if (state.wallets.length === 0) {
-        container.innerHTML = `<div class="p-4 text-center bg-surface-container-low/50 rounded-xl"><p class="text-sm text-on-surface-variant">Belum ada dompet.</p></div>`;
+        container.innerHTML = `<div class="p-4 text-center bg-surface-container-low dark:bg-slate-700/50 rounded-xl"><p class="text-sm text-on-surface-variant dark:text-slate-400">Belum ada dompet.</p></div>`;
         return;
     }
     container.innerHTML = state.wallets.map(w => `
-        <div class="flex items-center justify-between p-3 border border-outline/10 rounded-xl cursor-pointer hover:bg-surface-container-low transition-colors group" onclick="navigateTo('wallets'); setTimeout(()=>showWalletDetail('${w.id}'), 100)">
+        <div class="flex items-center justify-between p-3 border border-outline/10 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-surface-container-low dark:bg-slate-700 transition-colors group" onclick="navigateTo('wallets'); setTimeout(()=>showWalletDetail('${w.id}'), 100)">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <span class="material-symbols-outlined text-sm text-on-surface-variant">account_balance_wallet</span>
+                <div class="w-8 h-8 rounded-lg bg-surface-container dark:bg-slate-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <span class="material-symbols-outlined text-sm text-on-surface-variant dark:text-slate-400">account_balance_wallet</span>
                 </div>
                 <p class="font-medium text-sm">${w.name}</p>
             </div>
@@ -388,7 +503,7 @@ function renderTransactions() {
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     if (filtered.length === 0) {
-        container.innerHTML = `<div class="p-8 text-center text-sm text-on-surface-variant bg-surface-container-lowest rounded-xl border border-outline/5">Tidak ada data transaksi yang sesuai.</div>`;
+        container.innerHTML = `<div class="p-8 text-center text-sm text-on-surface-variant dark:text-slate-400 bg-surface-container-lowest dark:bg-slate-800 rounded-xl border border-outline/5 dark:border-slate-700">Tidak ada data transaksi yang sesuai.</div>`;
         return;
     }
 
@@ -414,14 +529,14 @@ function renderTransactions() {
         const sign = isTransfer ? '' : (isIncome ? '+' : '-');
         
         return `
-        <div class="flex items-center justify-between p-3 border border-outline/10 rounded-xl bg-surface-container-lowest hover:bg-surface-container-low transition-colors group">
+        <div class="flex items-center justify-between p-3 border border-outline/10 dark:border-slate-700 rounded-xl bg-surface-container-lowest dark:bg-slate-800 hover:bg-surface-container-low dark:bg-slate-700 transition-colors group">
             <div class="flex items-center gap-3 min-w-0">
                 <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${bgIcon}">
                     <span class="material-symbols-outlined text-lg">${icon}</span>
                 </div>
                 <div class="min-w-0">
-                    <p class="font-medium text-sm line-clamp-1 text-on-surface">${title}</p>
-                    <p class="text-[11px] text-on-surface-variant truncate mt-0.5">${subtitle}</p>
+                    <p class="font-medium text-sm line-clamp-1 text-on-surface dark:text-slate-100">${title}</p>
+                    <p class="text-[11px] text-on-surface-variant dark:text-slate-400 truncate mt-0.5">${subtitle}</p>
                 </div>
             </div>
             <div class="flex items-center gap-2 flex-shrink-0 ml-2">
@@ -429,8 +544,8 @@ function renderTransactions() {
                     <p class="font-semibold text-sm font-heading tracking-wide ${color}">${sign}${formatIDR(tx.amount)}</p>
                 </div>
                 <div class="flex flex-col gap-1 md:flex-row md:opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onclick="editTransaction('${tx.id}')" class="p-1 text-on-surface-variant hover:text-secondary rounded"><span class="material-symbols-outlined text-[16px]">edit</span></button>
-                    <button onclick="deleteTransaction('${tx.id}')" class="p-1 text-on-surface-variant hover:text-error rounded"><span class="material-symbols-outlined text-[16px]">delete</span></button>
+                    <button onclick="editTransaction('${tx.id}')" class="p-1 text-on-surface-variant dark:text-slate-400 hover:text-secondary rounded"><span class="material-symbols-outlined text-[16px]">edit</span></button>
+                    <button onclick="deleteTransaction('${tx.id}')" class="p-1 text-on-surface-variant dark:text-slate-400 hover:text-error rounded"><span class="material-symbols-outlined text-[16px]">delete</span></button>
                 </div>
             </div>
         </div>`;
@@ -440,31 +555,31 @@ function renderTransactions() {
 function renderWalletsGrid() {
     const container = document.getElementById('wallets-grid');
     if (state.wallets.length === 0) {
-        container.innerHTML = `<div class="col-span-full p-8 text-center bg-surface-container-lowest rounded-xl border border-outline/10"><p class="text-sm text-on-surface-variant">Belum ada dompet terdaftar.</p></div>`;
+        container.innerHTML = `<div class="col-span-full p-8 text-center bg-surface-container-lowest dark:bg-slate-800 rounded-xl border border-outline/10 dark:border-slate-700"><p class="text-sm text-on-surface-variant dark:text-slate-400">Belum ada dompet terdaftar.</p></div>`;
         return;
     }
 
     container.innerHTML = state.wallets.map(w => `
-        <div class="bg-surface-container-lowest border border-outline/10 rounded-xl p-5 shadow-sm relative group overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow cursor-pointer" onclick="showWalletDetail('${w.id}')">
+        <div class="bg-surface-container-lowest dark:bg-slate-800 border border-outline/10 dark:border-slate-700 rounded-xl p-5 shadow-sm relative group overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow cursor-pointer" onclick="showWalletDetail('${w.id}')">
             <div class="absolute -right-4 -top-4 w-20 h-20 bg-primary/5 rounded-full pointer-events-none group-hover:scale-150 transition-transform duration-500"></div>
             <div class="flex items-start justify-between mb-6">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-on-surface">
+                    <div class="w-10 h-10 rounded-lg bg-surface-container dark:bg-slate-600 flex items-center justify-center text-on-surface dark:text-slate-100">
                         <span class="material-symbols-outlined">account_balance_wallet</span>
                     </div>
                     <div>
                         <h3 class="font-heading font-semibold text-base">${w.name}</h3>
-                        <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full ${w.active !== false ? 'bg-secondary/10 text-secondary' : 'bg-outline/10 text-on-surface-variant'} font-bold">
+                        <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full ${w.active !== false ? 'bg-secondary/10 text-secondary' : 'bg-outline/10 text-on-surface-variant dark:text-slate-400'} font-bold">
                             ${w.active !== false ? 'Aktif' : 'Nonaktif'}
                         </span>
                     </div>
                 </div>
                 <div class="flex gap-1 relative z-10" onclick="event.stopPropagation()">
-                    <button onclick="editWallet('${w.id}')" class="p-1.5 text-on-surface-variant hover:text-secondary rounded-lg hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-sm">edit</span></button>
+                    <button onclick="editWallet('${w.id}')" class="p-1.5 text-on-surface-variant dark:text-slate-400 hover:text-secondary rounded-lg hover:bg-surface-container dark:bg-slate-600 transition-colors"><span class="material-symbols-outlined text-sm">edit</span></button>
                 </div>
             </div>
             <div>
-                <p class="text-sm text-on-surface-variant mb-1">Total Saldo</p>
+                <p class="text-sm text-on-surface-variant dark:text-slate-400 mb-1">Total Saldo</p>
                 <p class="text-2xl font-bold font-heading">${formatIDR(w.balance)}</p>
             </div>
         </div>
@@ -485,7 +600,7 @@ function showWalletDetail(walletId) {
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     if (filteredTx.length === 0) {
-        txContainer.innerHTML = `<p class="text-sm text-on-surface-variant py-8 text-center bg-surface-container-low/50 rounded-xl">Belum ada transaksi di dompet ini.</p>`;
+        txContainer.innerHTML = `<p class="text-sm text-on-surface-variant dark:text-slate-400 py-8 text-center bg-surface-container-low dark:bg-slate-700/50 rounded-xl">Belum ada transaksi di dompet ini.</p>`;
     } else {
         txContainer.innerHTML = filteredTx.map(tx => {
             let isIncome = tx.type === 'income';
@@ -505,7 +620,7 @@ function showWalletDetail(walletId) {
                     subtitle = `${formatDate(tx.date)} &bull; Dari ${tx.fromWalletName}`;
                 } else {
                     // Keluar karena transfer
-                    color = 'text-on-surface-variant';
+                    color = 'text-on-surface-variant dark:text-slate-400';
                     sign = '-';
                     title = tx.note || 'Kirim Transfer';
                     subtitle = `${formatDate(tx.date)} &bull; Ke ${tx.toWalletName}`;
@@ -513,10 +628,10 @@ function showWalletDetail(walletId) {
             }
 
             return `
-            <div class="flex items-center justify-between py-3 px-2 hover:bg-surface-container-low transition-colors rounded-lg">
+            <div class="flex items-center justify-between py-3 px-2 hover:bg-surface-container-low dark:bg-slate-700 transition-colors rounded-lg">
                 <div>
                     <p class="font-medium text-sm">${title}</p>
-                    <p class="text-xs text-on-surface-variant">${subtitle}</p>
+                    <p class="text-xs text-on-surface-variant dark:text-slate-400">${subtitle}</p>
                 </div>
                 <p class="font-semibold text-sm font-heading ${color}">${sign}${formatIDR(tx.amount)}</p>
             </div>`;
@@ -541,30 +656,179 @@ function renderCategories() {
     const expenseCats = state.categories.filter(c => c.type === 'expense');
 
     const renderItem = (cat) => `
-        <div class="flex items-center justify-between p-3 border border-outline/10 rounded-xl hover:bg-surface-container-low transition-colors group">
+        <div class="flex items-center justify-between p-3 border border-outline/10 dark:border-slate-700 rounded-xl hover:bg-surface-container-low dark:bg-slate-700 transition-colors group">
             <div class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full ${cat.type === 'income' ? 'bg-secondary' : 'bg-error'}"></span>
                 <span class="font-medium text-sm">${cat.name}</span>
             </div>
             <div class="flex gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onclick="editCategory('${cat.id}')" class="p-1.5 text-on-surface-variant hover:text-secondary rounded-lg hover:bg-surface-container"><span class="material-symbols-outlined text-sm">edit</span></button>
-                <button onclick="deleteCategory('${cat.id}')" class="p-1.5 text-on-surface-variant hover:text-error rounded-lg hover:bg-error/10"><span class="material-symbols-outlined text-sm">delete</span></button>
+                <button onclick="editCategory('${cat.id}')" class="p-1.5 text-on-surface-variant dark:text-slate-400 hover:text-secondary rounded-lg hover:bg-surface-container dark:bg-slate-600"><span class="material-symbols-outlined text-sm">edit</span></button>
+                <button onclick="deleteCategory('${cat.id}')" class="p-1.5 text-on-surface-variant dark:text-slate-400 hover:text-error rounded-lg hover:bg-error/10"><span class="material-symbols-outlined text-sm">delete</span></button>
             </div>
         </div>
     `;
 
-    incContainer.innerHTML = incomeCats.length ? incomeCats.map(renderItem).join('') : `<p class="text-sm text-on-surface-variant p-4 text-center bg-surface-container-low/50 rounded-xl">Belum ada kategori pemasukan.</p>`;
-    expContainer.innerHTML = expenseCats.length ? expenseCats.map(renderItem).join('') : `<p class="text-sm text-on-surface-variant p-4 text-center bg-surface-container-low/50 rounded-xl">Belum ada kategori pengeluaran.</p>`;
+    incContainer.innerHTML = incomeCats.length ? incomeCats.map(renderItem).join('') : `<p class="text-sm text-on-surface-variant dark:text-slate-400 p-4 text-center bg-surface-container-low dark:bg-slate-700/50 rounded-xl">Belum ada kategori pemasukan.</p>`;
+    expContainer.innerHTML = expenseCats.length ? expenseCats.map(renderItem).join('') : `<p class="text-sm text-on-surface-variant dark:text-slate-400 p-4 text-center bg-surface-container-low dark:bg-slate-700/50 rounded-xl">Belum ada kategori pengeluaran.</p>`;
 }
 
 // ==========================================
 // MODAL & FORMS LOGIC
 // ==========================================
 function closeModals() {
-    ['modal-transaction', 'modal-wallet', 'modal-category'].forEach(id => {
-        document.getElementById(id).classList.add('hidden');
-        document.getElementById(id).classList.remove('flex');
+    ['modal-transaction', 'modal-wallet', 'modal-category', 'modal-export'].forEach(id => {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
     });
+}
+
+function openExportModal() {
+    const modal = document.getElementById('modal-export');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.getElementById('export-period').value = 'this_month';
+        toggleCustomDateExport();
+    }
+}
+
+function toggleCustomDateExport() {
+    const period = document.getElementById('export-period').value;
+    const customDiv = document.getElementById('export-custom-date');
+    if (period === 'custom') {
+        customDiv.classList.remove('hidden');
+    } else {
+        customDiv.classList.add('hidden');
+    }
+}
+
+function getExportDateRange() {
+    const period = document.getElementById('export-period').value;
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    let start = new Date(today);
+    let end = new Date(today);
+    end.setHours(23,59,59,999);
+
+    if (period === 'this_week') {
+        const day = today.getDay();
+        const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+        start.setDate(diff);
+    } else if (period === 'this_month') {
+        start = new Date(today.getFullYear(), today.getMonth(), 1);
+    } else if (period === 'this_year') {
+        start = new Date(today.getFullYear(), 0, 1);
+    } else if (period === 'custom') {
+        const customStart = document.getElementById('export-start').value;
+        const customEnd = document.getElementById('export-end').value;
+        if (!customStart || !customEnd) return null;
+        start = new Date(customStart);
+        start.setHours(0,0,0,0);
+        end = new Date(customEnd);
+        end.setHours(23,59,59,999);
+    }
+    
+    return { start, end };
+}
+
+function exportData(format) {
+    const range = getExportDateRange();
+    if (!range) {
+        showToast('Mohon pilih tanggal mulai dan selesai.', 'error');
+        return;
+    }
+
+    const { start, end } = range;
+    
+    const filteredTx = state.transactions.filter(tx => {
+        const txDate = new Date(tx.date);
+        return txDate >= start && txDate <= end;
+    }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    if (filteredTx.length === 0) {
+        showToast('Tidak ada transaksi pada rentang waktu tersebut.', 'error');
+        return;
+    }
+
+    let totalIncome = 0;
+    let totalExpense = 0;
+    filteredTx.forEach(tx => {
+        if (tx.type === 'income') totalIncome += tx.amount;
+        if (tx.type === 'expense') totalExpense += tx.amount;
+    });
+
+    const periodStr = `${start.toLocaleDateString('id-ID')} - ${end.toLocaleDateString('id-ID')}`;
+
+    if (format === 'csv') {
+        let csv = 'Tanggal,Tipe,Kategori,Dompet,Jumlah,Catatan\n';
+        filteredTx.forEach(tx => {
+            const dateStr = formatDate(tx.date);
+            const typeStr = tx.type === 'income' ? 'Pemasukan' : (tx.type === 'expense' ? 'Pengeluaran' : 'Transfer');
+            const catStr = tx.category || '';
+            const walletStr = tx.type === 'transfer' ? `${tx.fromWalletName} -> ${tx.toWalletName}` : tx.walletName;
+            const amountStr = tx.amount;
+            const noteStr = (tx.note || '').replace(/,/g, ' '); 
+            csv += `"${dateStr}","${typeStr}","${catStr}","${walletStr}","${amountStr}","${noteStr}"\n`;
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `Laporan_Keuangan_${Date.now()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        closeModals();
+        showToast('Laporan CSV berhasil diunduh.', 'success');
+    } else if (format === 'pdf') {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.text("Laporan Keuangan", 14, 20);
+        
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Periode: ${periodStr}`, 14, 28);
+        
+        doc.text(`Total Pemasukan: ${formatIDR(totalIncome)}`, 14, 35);
+        doc.text(`Total Pengeluaran: ${formatIDR(totalExpense)}`, 14, 41);
+        doc.text(`Surplus/Defisit: ${formatIDR(totalIncome - totalExpense)}`, 14, 47);
+
+        const tableColumn = ["Tanggal", "Tipe", "Kategori", "Dompet", "Jumlah", "Catatan"];
+        const tableRows = [];
+
+        filteredTx.forEach(tx => {
+            const dateStr = formatDate(tx.date);
+            const typeStr = tx.type === 'income' ? 'Pemasukan' : (tx.type === 'expense' ? 'Pengeluaran' : 'Transfer');
+            const catStr = tx.category || '-';
+            const walletStr = tx.type === 'transfer' ? `${tx.fromWalletName} -> ${tx.toWalletName}` : (tx.walletName || '-');
+            const amountStr = formatIDR(tx.amount);
+            const noteStr = tx.note || '-';
+            
+            tableRows.push([dateStr, typeStr, catStr, walletStr, amountStr, noteStr]);
+        });
+
+        doc.autoTable({
+            startY: 55,
+            head: [tableColumn],
+            body: tableRows,
+            theme: 'grid',
+            headStyles: { fillColor: [0, 108, 73] },
+            styles: { fontSize: 8 }
+        });
+
+        doc.save(`Laporan_Keuangan_${Date.now()}.pdf`);
+        closeModals();
+        showToast('Laporan PDF berhasil diunduh.', 'success');
+    }
 }
 
 // Close modal on click outside
@@ -736,9 +1000,27 @@ async function saveTransaction() {
 
     const res = await apiPost(payload);
     if (res) {
+        cache.dashboard = {}; // Invalidasi cache dashboard
         closeModals();
-        loadTransactions();
-        loadDashboard();
+        
+        // Optimistic update local state
+        if (id) {
+            const idx = state.transactions.findIndex(t => t.id == id);
+            if (idx >= 0) state.transactions[idx] = { ...state.transactions[idx], ...localData };
+        } else {
+            state.transactions.unshift({ id: Date.now().toString(), ...localData });
+        }
+        
+        const wIdx = state.wallets.findIndex(w => w.id == walletId);
+        if (wIdx >= 0) {
+            state.wallets[wIdx].balance += (type === 'income' ? Number(amount) : -Number(amount));
+        }
+
+        renderTransactions();
+        
+        // Fetch background
+        loadTransactions(true);
+        loadDashboard(true);
     }
 }
 
@@ -757,8 +1039,12 @@ async function deleteTransaction(id) {
 
     const res = await apiPost({ action: 'deleteTransaction', id });
     if (res) {
-        loadTransactions();
-        loadDashboard();
+        cache.dashboard = {}; // Invalidasi
+        state.transactions = state.transactions.filter(t => t.id != id);
+        renderTransactions();
+        
+        loadTransactions(true);
+        loadDashboard(true);
     }
 }
 
@@ -817,8 +1103,18 @@ async function saveWallet() {
 
     const res = await apiPost(payload);
     if (res) {
+        cache.dashboard = {};
         closeModals();
-        loadWallets();
+        
+        if (id) {
+            const idx = state.wallets.findIndex(t => t.id == id);
+            if (idx >= 0) state.wallets[idx] = { ...state.wallets[idx], ...localData };
+        } else {
+            state.wallets.push({ id: Date.now().toString(), active: true, ...localData });
+        }
+        renderWalletsGrid();
+        
+        loadWallets(true);
     }
 }
 function editWallet(id) { openWalletModal(id); }
@@ -878,7 +1174,16 @@ async function saveCategory() {
     const res = await apiPost(payload);
     if (res) {
         closeModals();
-        loadCategories();
+        
+        if (id) {
+            const idx = state.categories.findIndex(t => t.id == id);
+            if (idx >= 0) state.categories[idx] = { id, ...data };
+        } else {
+            state.categories.push({ id: Date.now().toString(), ...data });
+        }
+        renderCategories();
+        
+        loadCategories(true);
     }
 }
 function editCategory(id) { openCategoryModal(id); }
@@ -895,7 +1200,10 @@ async function deleteCategory(id) {
 
     const res = await apiPost({ action: 'deleteCategory', id });
     if (res) {
-        loadCategories();
+        state.categories = state.categories.filter(t => t.id != id);
+        renderCategories();
+        
+        loadCategories(true);
     }
 }
 
