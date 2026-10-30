@@ -113,10 +113,14 @@
             </nav>
         </div>
         <div class="flex items-center gap-3">
-            <button onclick="toggleTheme()"
+            <button onclick="toggleTheme()" title="Ganti Tema"
                 class="p-2 text-on-surface-variant dark:text-slate-400 hover:bg-surface-container-low dark:hover:bg-slate-700 rounded-full transition-colors flex items-center justify-center">
                 <span class="material-symbols-outlined dark:hidden">dark_mode</span>
                 <span class="material-symbols-outlined hidden dark:block">light_mode</span>
+            </button>
+            <button onclick="logout()" title="Kunci / Keluar" aria-label="Kunci / Keluar"
+                class="p-2 text-on-surface-variant dark:text-slate-400 hover:text-error hover:bg-error/10 rounded-full transition-colors flex items-center justify-center">
+                <span class="material-symbols-outlined text-xl">lock</span>
             </button>
             <button onclick="openTransactionModal()"
                 class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg shadow-sm hover:opacity-90 transition-all font-medium active:scale-95">
@@ -128,7 +132,10 @@
     <!-- Mobile Topbar -->
     <header
         class="fixed top-0 left-0 right-0 h-14 bg-surface-container-lowest dark:bg-slate-800/90 dark:bg-slate-800/90 backdrop-blur-md shadow-sm z-40 flex md:hidden items-center justify-between px-4 transition-colors duration-300">
-        <div class="w-8"></div>
+        <button onclick="logout()" title="Kunci / Keluar" aria-label="Kunci / Keluar"
+            class="p-1.5 text-on-surface-variant dark:text-slate-400 hover:text-error rounded-full transition-colors flex items-center justify-center">
+            <span class="material-symbols-outlined text-xl">lock</span>
+        </button>
         <span class="font-heading text-lg font-bold" id="mobile-page-title">Beranda</span>
         <button onclick="toggleTheme()"
             class="p-1 text-on-surface-variant dark:text-slate-400 hover:bg-surface-container-low dark:hover:bg-slate-700 rounded-full transition-colors flex items-center justify-center">
@@ -423,9 +430,13 @@
                         <option value="all">Semua Waktu</option>
                         <option value="custom">Rentang Kustom...</option>
                     </select>
-                    <button onclick="openExportModal()"
-                        class="flex items-center gap-1.5 px-3.5 py-2 bg-secondary text-white rounded-lg shadow-sm hover:opacity-90 transition-all font-medium text-sm active:scale-95 whitespace-nowrap">
-                        <span class="material-symbols-outlined text-sm">download</span> Ekspor Dokumen
+                    <button onclick="exportData('pdf')" title="Unduh laporan periode ini (PDF)"
+                        class="flex items-center gap-1.5 px-3.5 py-2 bg-secondary text-white rounded-lg shadow-sm hover:opacity-90 transition-all font-medium text-xs active:scale-95 whitespace-nowrap">
+                        <span class="material-symbols-outlined text-sm">picture_as_pdf</span> Unduh PDF
+                    </button>
+                    <button onclick="exportData('csv')" title="Unduh data periode ini (CSV)"
+                        class="flex items-center gap-1.5 px-3.5 py-2 bg-secondary text-white rounded-lg shadow-sm hover:opacity-90 transition-all font-medium text-xs active:scale-95 whitespace-nowrap">
+                        <span class="material-symbols-outlined text-sm">description</span> Unduh CSV
                     </button>
                 </div>
             </div>
@@ -526,32 +537,6 @@
                         <p class="text-sm text-on-surface-variant dark:text-slate-400 text-center py-8">Memuat
                             rekonsiliasi dompet...</p>
                     </div>
-                </div>
-            </div>
-
-            <!-- 3. Export Center Banner -->
-            <div
-                class="bg-gradient-to-r from-secondary/10 via-surface-container-lowest to-surface-container-lowest dark:from-secondary/20 dark:via-slate-800 dark:to-slate-800 p-5 rounded-xl border border-secondary/20 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div class="flex items-center gap-3">
-                    <div
-                        class="w-12 h-12 rounded-xl bg-secondary/15 text-secondary flex items-center justify-center flex-shrink-0">
-                        <span class="material-symbols-outlined text-2xl">picture_as_pdf</span>
-                    </div>
-                    <div>
-                        <h3 class="font-heading font-semibold text-base">Arsipkan Laporan Keuangan</h3>
-                        <p class="text-xs text-on-surface-variant dark:text-slate-400">Unduh dokumen resmi siap cetak
-                            (PDF) atau data mentah spreadsheet (CSV) untuk periode yang dipilih.</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2.5 w-full md:w-auto">
-                    <button onclick="exportData('pdf')"
-                        class="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-error text-white font-medium rounded-xl hover:opacity-90 transition-all text-xs shadow-sm active:scale-95">
-                        <span class="material-symbols-outlined text-sm">picture_as_pdf</span> Unduh PDF
-                    </button>
-                    <button onclick="exportData('csv')"
-                        class="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-container dark:bg-slate-700 text-on-surface dark:text-slate-100 font-medium rounded-xl hover:bg-surface-container-high dark:hover:bg-slate-600 transition-all text-xs border border-outline/10 active:scale-95">
-                        <span class="material-symbols-outlined text-sm">description</span> Unduh CSV
-                    </button>
                 </div>
             </div>
         </section>
@@ -735,10 +720,12 @@
                         <div class="relative">
                             <span
                                 class="absolute left-3 top-1/2 -translate-y-1/2 font-medium text-on-surface-variant dark:text-slate-400">Rp</span>
-                            <input type="number" id="tx-amount" required
+                            <input type="text" inputmode="numeric" id="tx-amount" required
                                 class="w-full pl-9 pr-3 py-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors font-heading text-lg"
                                 placeholder="0">
                         </div>
+                        <p id="tx-amount-preview"
+                            class="text-xs text-secondary dark:text-emerald-400 mt-1 font-medium min-h-[1rem]"></p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -752,8 +739,13 @@
                             <label
                                 class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Waktu
                                 (Jam)</label>
-                            <input type="time" id="tx-time" required
-                                class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
+                            <div class="relative cursor-pointer" onclick="openClockPicker()">
+                                <input type="text" id="tx-time" required readonly
+                                    class="w-full p-2.5 pr-9 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm font-medium cursor-pointer"
+                                    placeholder="00:00">
+                                <span
+                                    class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline dark:text-slate-400 text-lg pointer-events-none">schedule</span>
+                            </div>
                         </div>
                     </div>
 
@@ -830,10 +822,12 @@
                         <div class="relative">
                             <span
                                 class="absolute left-3 top-1/2 -translate-y-1/2 font-medium text-on-surface-variant dark:text-slate-400 text-sm">Rp</span>
-                            <input type="number" id="wallet-balance" required
+                            <input type="text" inputmode="numeric" id="wallet-balance" required
                                 class="w-full pl-9 pr-3 py-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm font-heading"
                                 placeholder="0">
                         </div>
+                        <p id="wallet-balance-preview"
+                            class="text-xs text-secondary dark:text-emerald-400 mt-1 font-medium min-h-[1rem]"></p>
                     </div>
                 </form>
             </div>
@@ -946,7 +940,79 @@
             </div>
         </div>
     </div>
+    <!-- Clock Picker Modal (Analog Material 3 Style) -->
+    <div id="modal-clock-picker"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[70] hidden items-center justify-center p-4">
+        <div
+            class="bg-surface-container-lowest dark:bg-slate-800 w-full max-w-[280px] rounded-3xl shadow-2xl border border-outline/10 dark:border-slate-700 overflow-hidden flex flex-col">
 
+            <!-- Time Display Header -->
+            <div class="p-4 pb-3 flex items-center justify-between border-b border-outline/10 dark:border-slate-700">
+                <div class="flex items-center text-3xl font-heading font-bold">
+                    <button id="clock-btn-hour" onclick="setClockMode('hour')"
+                        class="px-2.5 py-1 rounded-xl bg-secondary/15 text-secondary transition-all">
+                        12
+                    </button>
+                    <span class="mx-1 text-on-surface-variant dark:text-slate-400 font-light">:</span>
+                    <button id="clock-btn-minute" onclick="setClockMode('minute')"
+                        class="px-2.5 py-1 rounded-xl text-on-surface-variant dark:text-slate-400 hover:bg-surface-container-low dark:hover:bg-slate-700 transition-all">
+                        00
+                    </button>
+                </div>
+                <div
+                    class="flex flex-col border border-outline/20 dark:border-slate-600 rounded-xl overflow-hidden text-xs font-semibold">
+                    <button id="clock-btn-am" onclick="setClockPeriod('AM')" class="px-3 py-1 transition-colors">
+                        AM
+                    </button>
+                    <button id="clock-btn-pm" onclick="setClockPeriod('PM')" class="px-3 py-1 transition-colors">
+                        PM
+                    </button>
+                </div>
+            </div>
+
+            <!-- Analog Clock Face -->
+            <div class="p-4 flex flex-col items-center justify-center">
+                <div id="clock-face"
+                    class="relative w-[220px] h-[220px] rounded-full bg-surface-container-low dark:bg-slate-700/60 shadow-inner select-none cursor-pointer">
+                    <!-- Center Pivot -->
+                    <div
+                        class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-secondary z-20">
+                    </div>
+
+                    <!-- Clock Hand -->
+                    <div id="clock-hand"
+                        class="absolute left-1/2 top-1/2 origin-top -translate-x-1/2 z-10 transition-transform duration-150 ease-out pointer-events-none"
+                        style="height: 78px; width: 2px;">
+                        <div class="w-full h-full bg-secondary"></div>
+                        <!-- Hand Tip Circle -->
+                        <div class="absolute -bottom-3 -left-[11px] w-6 h-6 rounded-full bg-secondary opacity-30"></div>
+                    </div>
+
+                    <!-- Numbers Container -->
+                    <div id="clock-numbers" class="absolute inset-0 z-10 pointer-events-none"></div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="p-3 border-t border-outline/10 dark:border-slate-700 flex items-center justify-between">
+                <button onclick="setClockToNow()"
+                    class="text-xs font-semibold text-secondary hover:underline px-2 py-1">
+                    Sekarang
+                </button>
+                <div class="flex items-center gap-2">
+                    <button onclick="closeClockPicker()"
+                        class="px-3 py-1.5 text-xs font-medium text-on-surface-variant dark:text-slate-400 hover:bg-surface-container dark:hover:bg-slate-700 rounded-lg transition-colors">
+                        Batal
+                    </button>
+                    <button onclick="confirmClockPicker()"
+                        class="px-4 py-1.5 text-xs font-semibold bg-secondary text-white rounded-lg shadow-sm hover:opacity-90 active:scale-95 transition-all">
+                        Selesai
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
     <script src="app.js?v=5.5"></script>
 </body>
 

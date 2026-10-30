@@ -82,6 +82,13 @@ function togglePasswordVisibility() {
     }
 }
 
+/**
+ * Quick lock / logout
+ */
+function logout() {
+    sessionStorage.removeItem("authenticated");
+    window.location.href = "login.html";
+}
+
 // Check session on load
 checkSession();
-
