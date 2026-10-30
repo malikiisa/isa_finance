@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinTrack - Pencatatan Keuangan</title>
     <!-- Fonts and Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap"
+        rel="stylesheet" />
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- jsPDF & AutoTable -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -40,20 +44,33 @@
         }
     </script>
     <style>
-        .page-section { display: none; }
-        .page-section.active { display: block; }
-        
-        .nav-btn.active { 
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        .nav-btn.active {
             color: #0b1c30;
             font-weight: 600;
             background-color: #e5eeff;
             border-radius: 0.5rem;
         }
-        .mobile-nav-btn.active { color: #006c49; }
-        
+
+        .mobile-nav-btn.active {
+            color: #006c49;
+        }
+
         /* Hide scrollbar for clean UI */
-        ::-webkit-scrollbar { display: none; }
-        * { scrollbar-width: none; }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        * {
+            scrollbar-width: none;
+        }
     </style>
     <script>
         // Inisialisasi tema
@@ -63,39 +80,58 @@
             document.documentElement.classList.remove('dark');
         }
     </script>
+    <!-- Auth Guard -->
+    <script src="auth.js"></script>
 </head>
-<body class="bg-surface dark:bg-slate-900 text-on-surface dark:text-slate-100 antialiased pt-16 pb-20 md:pb-0 transition-colors duration-300">
+
+<body
+    class="bg-surface dark:bg-slate-900 text-on-surface dark:text-slate-100 antialiased pt-16 pb-20 md:pb-0 transition-colors duration-300">
 
     <!-- Desktop Topbar -->
-    <header class="fixed top-0 left-0 right-0 h-16 bg-surface-container-lowest dark:bg-slate-800/90 dark:bg-slate-800/90 backdrop-blur-md shadow-sm z-40 hidden md:flex items-center justify-between px-6 transition-colors duration-300">
+    <header
+        class="fixed top-0 left-0 right-0 h-16 bg-surface-container-lowest dark:bg-slate-800/90 dark:bg-slate-800/90 backdrop-blur-md shadow-sm z-40 hidden md:flex items-center justify-between px-6 transition-colors duration-300">
         <div class="flex items-center gap-6">
             <span class="font-heading text-xl font-bold flex items-center gap-2 text-on-surface dark:text-slate-100">
                 <span class="material-symbols-outlined text-secondary">account_balance_wallet</span> FinTrack
             </span>
             <nav class="flex items-center gap-1 bg-surface-container-low dark:bg-slate-700 p-1 rounded-xl">
-                <button class="nav-btn active px-4 py-1.5 text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:text-slate-100 transition-colors" data-target="dashboard">Dashboard</button>
-                <button class="nav-btn px-4 py-1.5 text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:text-slate-100 transition-colors" data-target="transactions">Transaksi</button>
-                <button class="nav-btn px-4 py-1.5 text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:text-slate-100 transition-colors" data-target="reports">Laporan</button>
-                <button class="nav-btn px-4 py-1.5 text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:text-slate-100 transition-colors" data-target="wallets">Dompet</button>
-                <button class="nav-btn px-4 py-1.5 text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:hover:text-slate-100 transition-colors" data-target="categories">Kategori</button>
+                <button
+                    class="nav-btn active px-4 py-1.5 text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:text-slate-100 transition-colors"
+                    data-target="dashboard">Dashboard</button>
+                <button
+                    class="nav-btn px-4 py-1.5 text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:text-slate-100 transition-colors"
+                    data-target="transactions">Transaksi</button>
+                <button
+                    class="nav-btn px-4 py-1.5 text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:text-slate-100 transition-colors"
+                    data-target="reports">Laporan</button>
+                <button
+                    class="nav-btn px-4 py-1.5 text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:text-slate-100 transition-colors"
+                    data-target="wallets">Dompet</button>
+                <button
+                    class="nav-btn px-4 py-1.5 text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:hover:text-slate-100 transition-colors"
+                    data-target="categories">Kategori</button>
             </nav>
         </div>
         <div class="flex items-center gap-3">
-            <button onclick="toggleTheme()" class="p-2 text-on-surface-variant dark:text-slate-400 hover:bg-surface-container-low dark:hover:bg-slate-700 rounded-full transition-colors flex items-center justify-center">
+            <button onclick="toggleTheme()"
+                class="p-2 text-on-surface-variant dark:text-slate-400 hover:bg-surface-container-low dark:hover:bg-slate-700 rounded-full transition-colors flex items-center justify-center">
                 <span class="material-symbols-outlined dark:hidden">dark_mode</span>
                 <span class="material-symbols-outlined hidden dark:block">light_mode</span>
             </button>
-            <button onclick="openTransactionModal()" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg shadow-sm hover:opacity-90 transition-all font-medium active:scale-95">
+            <button onclick="openTransactionModal()"
+                class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg shadow-sm hover:opacity-90 transition-all font-medium active:scale-95">
                 <span class="material-symbols-outlined text-sm">add</span> Catat Transaksi
             </button>
         </div>
     </header>
 
     <!-- Mobile Topbar -->
-    <header class="fixed top-0 left-0 right-0 h-14 bg-surface-container-lowest dark:bg-slate-800/90 dark:bg-slate-800/90 backdrop-blur-md shadow-sm z-40 flex md:hidden items-center justify-between px-4 transition-colors duration-300">
+    <header
+        class="fixed top-0 left-0 right-0 h-14 bg-surface-container-lowest dark:bg-slate-800/90 dark:bg-slate-800/90 backdrop-blur-md shadow-sm z-40 flex md:hidden items-center justify-between px-4 transition-colors duration-300">
         <div class="w-8"></div>
         <span class="font-heading text-lg font-bold" id="mobile-page-title">Beranda</span>
-        <button onclick="toggleTheme()" class="p-1 text-on-surface-variant dark:text-slate-400 hover:bg-surface-container-low dark:hover:bg-slate-700 rounded-full transition-colors flex items-center justify-center">
+        <button onclick="toggleTheme()"
+            class="p-1 text-on-surface-variant dark:text-slate-400 hover:bg-surface-container-low dark:hover:bg-slate-700 rounded-full transition-colors flex items-center justify-center">
             <span class="material-symbols-outlined text-xl dark:hidden">dark_mode</span>
             <span class="material-symbols-outlined text-xl hidden dark:block">light_mode</span>
         </button>
@@ -103,16 +139,19 @@
 
     <!-- Main Content -->
     <main class="w-full max-w-7xl mx-auto p-4 md:p-6 mt-0 md:mt-4">
-        
+
         <!-- DASHBOARD -->
         <section id="dashboard" class="page-section active space-y-6">
             <!-- Greeting & Overview Info -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface-container-lowest dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700">
+            <div
+                class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface-container-lowest dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700">
                 <div>
                     <h1 class="font-heading text-xl font-bold">Ringkasan Finansial</h1>
-                    <p class="text-sm text-on-surface-variant dark:text-slate-400">Kondisi kas dan performa keuangan bulan ini</p>
+                    <p class="text-sm text-on-surface-variant dark:text-slate-400">Kondisi kas dan performa keuangan
+                        bulan ini</p>
                 </div>
-                <div class="flex items-center gap-2 text-xs font-medium text-on-surface-variant dark:text-slate-400 bg-surface-container-low dark:bg-slate-700/60 px-3 py-1.5 rounded-lg border border-outline/10 dark:border-slate-600 w-fit">
+                <div
+                    class="flex items-center gap-2 text-xs font-medium text-on-surface-variant dark:text-slate-400 bg-surface-container-low dark:bg-slate-700/60 px-3 py-1.5 rounded-lg border border-outline/10 dark:border-slate-600 w-fit">
                     <span class="material-symbols-outlined text-sm text-secondary">calendar_today</span>
                     <span>Bulan Ini</span>
                 </div>
@@ -120,26 +159,35 @@
 
             <!-- Metrics -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700 relative overflow-hidden group">
-                    <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-surface-container-high/40 rounded-full blur-xl"></div>
+                <div
+                    class="bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700 relative overflow-hidden group">
+                    <div
+                        class="absolute -right-6 -bottom-6 w-24 h-24 bg-surface-container-high/40 rounded-full blur-xl">
+                    </div>
                     <div class="flex justify-between items-start mb-2">
-                        <p class="text-sm text-on-surface-variant dark:text-slate-400 font-medium">Total Saldo (Semua Dompet)</p>
-                        <span class="material-symbols-outlined text-surface-container-high">account_balance_wallet</span>
+                        <p class="text-sm text-on-surface-variant dark:text-slate-400 font-medium">Total Saldo (Semua
+                            Dompet)</p>
+                        <span
+                            class="material-symbols-outlined text-surface-container-high">account_balance_wallet</span>
                     </div>
                     <p class="text-2xl font-bold font-heading mt-2" id="metric-balance">Rp 0</p>
                 </div>
-                <div class="bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700 relative overflow-hidden">
+                <div
+                    class="bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700 relative overflow-hidden">
                     <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-secondary/10 rounded-full blur-xl"></div>
                     <div class="flex justify-between items-start mb-2">
-                        <p class="text-sm text-on-surface-variant dark:text-slate-400 font-medium">Total Pemasukan (Bulan Ini)</p>
+                        <p class="text-sm text-on-surface-variant dark:text-slate-400 font-medium">Total Pemasukan
+                            (Bulan Ini)</p>
                         <span class="material-symbols-outlined text-secondary/30">arrow_downward</span>
                     </div>
                     <p class="text-2xl font-bold font-heading mt-2 text-secondary" id="metric-income">Rp 0</p>
                 </div>
-                <div class="bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700 relative overflow-hidden">
+                <div
+                    class="bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700 relative overflow-hidden">
                     <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-error/10 rounded-full blur-xl"></div>
                     <div class="flex justify-between items-start mb-2">
-                        <p class="text-sm text-on-surface-variant dark:text-slate-400 font-medium">Total Pengeluaran (Bulan Ini)</p>
+                        <p class="text-sm text-on-surface-variant dark:text-slate-400 font-medium">Total Pengeluaran
+                            (Bulan Ini)</p>
                         <span class="material-symbols-outlined text-error/30">arrow_upward</span>
                     </div>
                     <p class="text-2xl font-bold font-heading mt-2 text-error" id="metric-expense">Rp 0</p>
@@ -149,61 +197,79 @@
             <!-- Financial Snapshot (Clean & 5-Second Glanceable) -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <!-- Card 1: Arus Kas Bersih Snapshot -->
-                <div class="lg:col-span-5 bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700 flex flex-col justify-between space-y-4">
+                <div
+                    class="lg:col-span-5 bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700 flex flex-col justify-between space-y-4">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs uppercase tracking-wider font-semibold text-on-surface-variant dark:text-slate-400 flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-secondary text-base">savings</span> Arus Kas Bersih
+                        <span
+                            class="text-xs uppercase tracking-wider font-semibold text-on-surface-variant dark:text-slate-400 flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-secondary text-base">savings</span> Arus Kas
+                            Bersih
                         </span>
-                        <span id="health-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-secondary/10 text-secondary">Surplus</span>
+                        <span id="health-badge"
+                            class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-secondary/10 text-secondary">Surplus</span>
                     </div>
 
                     <div>
                         <p class="text-3xl font-bold font-heading text-secondary" id="report-net-cashflow">Rp 0</p>
-                        <div class="flex items-center justify-between text-xs text-on-surface-variant dark:text-slate-400 mt-2 mb-1.5">
+                        <div
+                            class="flex items-center justify-between text-xs text-on-surface-variant dark:text-slate-400 mt-2 mb-1.5">
                             <span>Tersimpan dari pemasukan</span>
-                            <span class="font-semibold text-on-surface dark:text-slate-200" id="report-savings-rate">0%</span>
+                            <span class="font-semibold text-on-surface dark:text-slate-200"
+                                id="report-savings-rate">0%</span>
                         </div>
                         <div class="w-full h-2 rounded-full bg-surface-container dark:bg-slate-700 overflow-hidden">
-                            <div id="report-savings-bar" class="h-full bg-secondary transition-all duration-500 rounded-full" style="width: 0%"></div>
+                            <div id="report-savings-bar"
+                                class="h-full bg-secondary transition-all duration-500 rounded-full" style="width: 0%">
+                            </div>
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between pt-3 border-t border-outline/10 dark:border-slate-700 text-xs">
+                    <div
+                        class="flex items-center justify-between pt-3 border-t border-outline/10 dark:border-slate-700 text-xs">
                         <span class="text-on-surface-variant dark:text-slate-400">Rata-rata belanja harian:</span>
-                        <strong class="font-heading font-semibold text-on-surface dark:text-slate-200" id="report-daily-burn">Rp 0</strong>
+                        <strong class="font-heading font-semibold text-on-surface dark:text-slate-200"
+                            id="report-daily-burn">Rp 0</strong>
                     </div>
                 </div>
 
                 <!-- Card 2: Top Pengeluaran Snapshot -->
-                <div class="lg:col-span-7 bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700 flex flex-col justify-between space-y-3">
+                <div
+                    class="lg:col-span-7 bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700 flex flex-col justify-between space-y-3">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs uppercase tracking-wider font-semibold text-on-surface-variant dark:text-slate-400 flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-error text-base">pie_chart</span> Top Pengeluaran
+                        <span
+                            class="text-xs uppercase tracking-wider font-semibold text-on-surface-variant dark:text-slate-400 flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-error text-base">pie_chart</span> Top
+                            Pengeluaran
                         </span>
-                        <button onclick="navigateTo('reports')" class="text-xs text-secondary font-medium hover:underline flex items-center gap-1">
+                        <button onclick="navigateTo('reports')"
+                            class="text-xs text-secondary font-medium hover:underline flex items-center gap-1">
                             Laporan Lengkap <span class="material-symbols-outlined text-xs">arrow_forward</span>
                         </button>
                     </div>
 
                     <div id="report-spending-breakdown" class="space-y-2.5">
-                        <p class="text-xs text-on-surface-variant dark:text-slate-400 text-center py-4">Memuat data...</p>
+                        <p class="text-xs text-on-surface-variant dark:text-slate-400 text-center py-4">Memuat data...
+                        </p>
                     </div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Wallets -->
-                <div class="bg-surface-container-lowest dark:bg-slate-800 rounded-xl shadow-sm p-5 flex flex-col gap-4 border border-outline/5 dark:border-slate-700">
+                <div
+                    class="bg-surface-container-lowest dark:bg-slate-800 rounded-xl shadow-sm p-5 flex flex-col gap-4 border border-outline/5 dark:border-slate-700">
                     <h2 class="font-heading font-semibold text-lg">Ringkasan Dompet</h2>
                     <div id="dashboard-wallets" class="flex flex-col gap-3 max-h-[300px] overflow-y-auto">
                         <p class="text-sm text-on-surface-variant dark:text-slate-400">Memuat...</p>
                     </div>
                 </div>
                 <!-- Transactions -->
-                <div class="bg-surface-container-lowest dark:bg-slate-800 rounded-xl shadow-sm p-5 lg:col-span-2 flex flex-col gap-4 border border-outline/5 dark:border-slate-700">
+                <div
+                    class="bg-surface-container-lowest dark:bg-slate-800 rounded-xl shadow-sm p-5 lg:col-span-2 flex flex-col gap-4 border border-outline/5 dark:border-slate-700">
                     <div class="flex items-center justify-between">
                         <h2 class="font-heading font-semibold text-lg">Transaksi Terakhir</h2>
-                        <button class="text-sm text-secondary font-medium hover:underline" onclick="navigateTo('transactions')">Lihat Semua</button>
+                        <button class="text-sm text-secondary font-medium hover:underline"
+                            onclick="navigateTo('transactions')">Lihat Semua</button>
                     </div>
                     <div id="dashboard-transactions" class="flex flex-col gap-3">
                         <p class="text-sm text-on-surface-variant dark:text-slate-400">Memuat...</p>
@@ -215,27 +281,34 @@
         <!-- TRANSACTIONS -->
         <section id="transactions" class="page-section space-y-4">
             <!-- Header bar with Title & Add Transaction Action -->
-            <div class="flex items-center justify-between gap-4 bg-surface-container-lowest dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700">
+            <div
+                class="flex items-center justify-between gap-4 bg-surface-container-lowest dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700">
                 <div>
                     <h1 class="font-heading text-xl font-bold">Riwayat Transaksi</h1>
-                    <p class="text-xs text-on-surface-variant dark:text-slate-400">Kelola dan telusuri seluruh mutasi kas Anda</p>
+                    <p class="text-xs text-on-surface-variant dark:text-slate-400">Kelola dan telusuri seluruh mutasi
+                        kas Anda</p>
                 </div>
-                <button onclick="openTransactionModal()" class="flex items-center justify-center gap-2 px-3.5 py-2 bg-primary text-white rounded-lg shadow-sm hover:opacity-90 transition-all font-medium text-sm active:scale-95 whitespace-nowrap">
+                <button onclick="openTransactionModal()"
+                    class="flex items-center justify-center gap-2 px-3.5 py-2 bg-primary text-white rounded-lg shadow-sm hover:opacity-90 transition-all font-medium text-sm active:scale-95 whitespace-nowrap">
                     <span class="material-symbols-outlined text-sm">add</span> Catat Transaksi
                 </button>
             </div>
 
             <!-- Comprehensive Filter Card -->
-            <div class="bg-surface-container-lowest dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700 space-y-3">
+            <div
+                class="bg-surface-container-lowest dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700 space-y-3">
                 <!-- Search & Preset Period Row -->
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
                     <div class="md:col-span-7 relative">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant dark:text-slate-400 text-sm">search</span>
-                        <input type="text" id="search-tx" placeholder="Cari catatan atau kategori..." class="w-full pl-9 pr-4 py-2 rounded-lg border border-outline/30 dark:border-slate-600 bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary transition-colors">
+                        <span
+                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant dark:text-slate-400 text-sm">search</span>
+                        <input type="text" id="search-tx" placeholder="Cari catatan atau kategori..."
+                            class="w-full pl-9 pr-4 py-2 rounded-lg border border-outline/30 dark:border-slate-600 bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary transition-colors">
                     </div>
                     <div class="md:col-span-5 flex gap-2">
                         <div class="relative flex-1">
-                            <select id="filter-period" class="w-full px-3 py-2 rounded-lg border border-outline/30 dark:border-slate-600 bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary transition-colors font-medium">
+                            <select id="filter-period"
+                                class="w-full px-3 py-2 rounded-lg border border-outline/30 dark:border-slate-600 bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary transition-colors font-medium">
                                 <option value="this_month" selected>Bulan Ini</option>
                                 <option value="all">Semua Waktu</option>
                                 <option value="today">Hari Ini</option>
@@ -249,22 +322,32 @@
                 </div>
 
                 <!-- Custom Date Range (Shown only when 'custom' is selected) -->
-                <div id="tx-custom-date-container" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-surface-container-low dark:bg-slate-700/50 rounded-lg">
+                <div id="tx-custom-date-container"
+                    class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-surface-container-low dark:bg-slate-700/50 rounded-lg">
                     <div>
-                        <label class="block text-[11px] font-semibold text-on-surface-variant dark:text-slate-400 uppercase mb-1">Dari Tanggal</label>
-                        <input type="date" id="filter-start-date" class="w-full p-2 rounded-lg border border-outline/30 dark:border-slate-600 bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary">
+                        <label
+                            class="block text-[11px] font-semibold text-on-surface-variant dark:text-slate-400 uppercase mb-1">Dari
+                            Tanggal</label>
+                        <input type="date" id="filter-start-date"
+                            class="w-full p-2 rounded-lg border border-outline/30 dark:border-slate-600 bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-on-surface-variant dark:text-slate-400 uppercase mb-1">Sampai Tanggal</label>
-                        <input type="date" id="filter-end-date" class="w-full p-2 rounded-lg border border-outline/30 dark:border-slate-600 bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary">
+                        <label
+                            class="block text-[11px] font-semibold text-on-surface-variant dark:text-slate-400 uppercase mb-1">Sampai
+                            Tanggal</label>
+                        <input type="date" id="filter-end-date"
+                            class="w-full p-2 rounded-lg border border-outline/30 dark:border-slate-600 bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary">
                     </div>
                 </div>
 
                 <!-- Multi-criteria Filter Selects (Type, Wallet, Category) -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 border-t border-outline/10 dark:border-slate-700">
+                <div
+                    class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 border-t border-outline/10 dark:border-slate-700">
                     <div>
-                        <label class="block text-[11px] font-semibold text-on-surface-variant dark:text-slate-400 uppercase mb-1">Tipe</label>
-                        <select id="filter-type" class="w-full px-3 py-2 rounded-lg border border-outline/30 dark:border-slate-600 bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary transition-colors">
+                        <label
+                            class="block text-[11px] font-semibold text-on-surface-variant dark:text-slate-400 uppercase mb-1">Tipe</label>
+                        <select id="filter-type"
+                            class="w-full px-3 py-2 rounded-lg border border-outline/30 dark:border-slate-600 bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary transition-colors">
                             <option value="">Semua Tipe</option>
                             <option value="income">Pemasukan</option>
                             <option value="expense">Pengeluaran</option>
@@ -272,50 +355,67 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-on-surface-variant dark:text-slate-400 uppercase mb-1">Dompet</label>
-                        <select id="filter-wallet" class="w-full px-3 py-2 rounded-lg border border-outline/30 dark:border-slate-600 bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary transition-colors">
+                        <label
+                            class="block text-[11px] font-semibold text-on-surface-variant dark:text-slate-400 uppercase mb-1">Dompet</label>
+                        <select id="filter-wallet"
+                            class="w-full px-3 py-2 rounded-lg border border-outline/30 dark:border-slate-600 bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary transition-colors">
                             <option value="">Semua Dompet</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-on-surface-variant dark:text-slate-400 uppercase mb-1">Kategori</label>
-                        <select id="filter-category" class="w-full px-3 py-2 rounded-lg border border-outline/30 dark:border-slate-600 bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary transition-colors">
+                        <label
+                            class="block text-[11px] font-semibold text-on-surface-variant dark:text-slate-400 uppercase mb-1">Kategori</label>
+                        <select id="filter-category"
+                            class="w-full px-3 py-2 rounded-lg border border-outline/30 dark:border-slate-600 bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary transition-colors">
                             <option value="">Semua Kategori</option>
                         </select>
                     </div>
                 </div>
 
                 <!-- Mini Summary Bar & Reset Action -->
-                <div class="flex flex-wrap items-center justify-between gap-2 pt-2 text-xs border-t border-outline/10 dark:border-slate-700 text-on-surface-variant dark:text-slate-400">
+                <div
+                    class="flex flex-wrap items-center justify-between gap-2 pt-2 text-xs border-t border-outline/10 dark:border-slate-700 text-on-surface-variant dark:text-slate-400">
                     <div class="flex flex-wrap items-center gap-3">
-                        <span class="font-medium bg-surface-container dark:bg-slate-700 px-2.5 py-1 rounded-md text-on-surface dark:text-slate-200" id="tx-summary-count">0 Transaksi</span>
-                        <span>Pemasukan: <strong id="tx-summary-income" class="text-secondary font-heading font-semibold">Rp 0</strong></span>
-                        <span>Pengeluaran: <strong id="tx-summary-expense" class="text-error font-heading font-semibold">Rp 0</strong></span>
-                        <span>Selisih: <strong id="tx-summary-net" class="font-heading font-semibold text-on-surface dark:text-slate-100">Rp 0</strong></span>
+                        <span
+                            class="font-medium bg-surface-container dark:bg-slate-700 px-2.5 py-1 rounded-md text-on-surface dark:text-slate-200"
+                            id="tx-summary-count">0 Transaksi</span>
+                        <span>Pemasukan: <strong id="tx-summary-income"
+                                class="text-secondary font-heading font-semibold">Rp 0</strong></span>
+                        <span>Pengeluaran: <strong id="tx-summary-expense"
+                                class="text-error font-heading font-semibold">Rp 0</strong></span>
+                        <span>Selisih: <strong id="tx-summary-net"
+                                class="font-heading font-semibold text-on-surface dark:text-slate-100">Rp
+                                0</strong></span>
                     </div>
-                    <button id="btn-reset-filter" onclick="resetTxFilters()" class="text-xs text-error font-medium flex items-center gap-1 hover:underline ml-auto">
+                    <button id="btn-reset-filter" onclick="resetTxFilters()"
+                        class="text-xs text-error font-medium flex items-center gap-1 hover:underline ml-auto">
                         <span class="material-symbols-outlined text-sm">restart_alt</span> Reset Filter
                     </button>
                 </div>
             </div>
-            
+
             <div id="tx-list" class="flex flex-col gap-3">
-                <div class="p-8 text-center text-sm text-on-surface-variant dark:text-slate-400 bg-surface-container-lowest dark:bg-slate-800 rounded-xl border border-outline/5 dark:border-slate-700">Memuat data...</div>
+                <div
+                    class="p-8 text-center text-sm text-on-surface-variant dark:text-slate-400 bg-surface-container-lowest dark:bg-slate-800 rounded-xl border border-outline/5 dark:border-slate-700">
+                    Memuat data...</div>
             </div>
         </section>
 
         <!-- REPORTS -->
         <section id="reports" class="page-section space-y-6">
             <!-- Header bar with Title, Period Filter & Export Actions -->
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-surface-container-lowest dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700">
+            <div
+                class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-surface-container-lowest dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700">
                 <div>
                     <h1 class="font-heading text-xl font-bold flex items-center gap-2">
                         <span class="material-symbols-outlined text-secondary">analytics</span> Laporan Finansial
                     </h1>
-                    <p class="text-xs text-on-surface-variant dark:text-slate-400">Analisis arus kas, distribusi kategori, rekonsiliasi dompet, & cetak dokumen</p>
+                    <p class="text-xs text-on-surface-variant dark:text-slate-400">Analisis arus kas, distribusi
+                        kategori, rekonsiliasi dompet, & cetak dokumen</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2.5">
-                    <select id="reports-period-select" onchange="handleReportsPeriodChange()" class="px-3 py-2 rounded-lg border border-outline/30 dark:border-slate-600 bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary font-medium">
+                    <select id="reports-period-select" onchange="handleReportsPeriodChange()"
+                        class="px-3 py-2 rounded-lg border border-outline/30 dark:border-slate-600 bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary font-medium">
                         <option value="this_month" selected>Bulan Ini</option>
                         <option value="last_month">Bulan Lalu</option>
                         <option value="quarter">Kuartal Ini (3 Bulan)</option>
@@ -323,100 +423,133 @@
                         <option value="all">Semua Waktu</option>
                         <option value="custom">Rentang Kustom...</option>
                     </select>
-                    <button onclick="openExportModal()" class="flex items-center gap-1.5 px-3.5 py-2 bg-secondary text-white rounded-lg shadow-sm hover:opacity-90 transition-all font-medium text-sm active:scale-95 whitespace-nowrap">
+                    <button onclick="openExportModal()"
+                        class="flex items-center gap-1.5 px-3.5 py-2 bg-secondary text-white rounded-lg shadow-sm hover:opacity-90 transition-all font-medium text-sm active:scale-95 whitespace-nowrap">
                         <span class="material-symbols-outlined text-sm">download</span> Ekspor Dokumen
                     </button>
                 </div>
             </div>
 
             <!-- Custom Date Range (Only visible if 'custom' is selected) -->
-            <div id="reports-custom-dates" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4 bg-surface-container-lowest dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700">
+            <div id="reports-custom-dates"
+                class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4 bg-surface-container-lowest dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700">
                 <div>
-                    <label class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase">Tanggal Mulai</label>
-                    <input type="date" id="reports-start-date" onchange="renderReportsTab()" class="w-full p-2 border border-outline/30 dark:border-slate-600 rounded-lg bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary">
+                    <label
+                        class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase">Tanggal
+                        Mulai</label>
+                    <input type="date" id="reports-start-date" onchange="renderReportsTab()"
+                        class="w-full p-2 border border-outline/30 dark:border-slate-600 rounded-lg bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase">Tanggal Selesai</label>
-                    <input type="date" id="reports-end-date" onchange="renderReportsTab()" class="w-full p-2 border border-outline/30 dark:border-slate-600 rounded-lg bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary">
+                    <label
+                        class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase">Tanggal
+                        Selesai</label>
+                    <input type="date" id="reports-end-date" onchange="renderReportsTab()"
+                        class="w-full p-2 border border-outline/30 dark:border-slate-600 rounded-lg bg-surface dark:bg-slate-900 text-sm focus:outline-none focus:border-secondary">
                 </div>
             </div>
 
             <!-- 1. Executive Cash Flow Overview -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700">
+                <div
+                    class="bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700">
                     <p class="text-xs text-on-surface-variant dark:text-slate-400 font-medium">Total Pemasukan</p>
                     <p class="text-xl font-bold font-heading text-secondary mt-1" id="reports-total-income">Rp 0</p>
-                    <span class="text-[11px] text-on-surface-variant dark:text-slate-400 block mt-1" id="reports-income-count">0 transaksi masuk</span>
+                    <span class="text-[11px] text-on-surface-variant dark:text-slate-400 block mt-1"
+                        id="reports-income-count">0 transaksi masuk</span>
                 </div>
-                <div class="bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700">
+                <div
+                    class="bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700">
                     <p class="text-xs text-on-surface-variant dark:text-slate-400 font-medium">Total Pengeluaran</p>
                     <p class="text-xl font-bold font-heading text-error mt-1" id="reports-total-expense">Rp 0</p>
-                    <span class="text-[11px] text-on-surface-variant dark:text-slate-400 block mt-1" id="reports-expense-count">0 transaksi keluar</span>
+                    <span class="text-[11px] text-on-surface-variant dark:text-slate-400 block mt-1"
+                        id="reports-expense-count">0 transaksi keluar</span>
                 </div>
-                <div class="bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700">
+                <div
+                    class="bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700">
                     <div class="flex items-center justify-between">
-                        <p class="text-xs text-on-surface-variant dark:text-slate-400 font-medium">Arus Kas Bersih (Net)</p>
-                        <span id="reports-health-badge" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-secondary/10 text-secondary">Surplus</span>
+                        <p class="text-xs text-on-surface-variant dark:text-slate-400 font-medium">Arus Kas Bersih (Net)
+                        </p>
+                        <span id="reports-health-badge"
+                            class="px-2 py-0.5 rounded text-[10px] font-semibold bg-secondary/10 text-secondary">Surplus</span>
                     </div>
                     <p class="text-xl font-bold font-heading mt-1" id="reports-net-cashflow">Rp 0</p>
-                    <span class="text-[11px] text-on-surface-variant dark:text-slate-400 block mt-1" id="reports-savings-rate">0% rasio tabungan</span>
+                    <span class="text-[11px] text-on-surface-variant dark:text-slate-400 block mt-1"
+                        id="reports-savings-rate">0% rasio tabungan</span>
                 </div>
-                <div class="bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700">
+                <div
+                    class="bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700">
                     <p class="text-xs text-on-surface-variant dark:text-slate-400 font-medium">Rata-Rata Belanja</p>
-                    <p class="text-xl font-bold font-heading text-on-surface dark:text-slate-100 mt-1" id="reports-burn-rate">Rp 0</p>
-                    <span class="text-[11px] text-on-surface-variant dark:text-slate-400 block mt-1" id="reports-days-label">per hari aktif</span>
+                    <p class="text-xl font-bold font-heading text-on-surface dark:text-slate-100 mt-1"
+                        id="reports-burn-rate">Rp 0</p>
+                    <span class="text-[11px] text-on-surface-variant dark:text-slate-400 block mt-1"
+                        id="reports-days-label">per hari aktif</span>
                 </div>
             </div>
 
             <!-- 2. Breakdown Grid: Kategori & Rekonsiliasi Dompet -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <!-- Category Breakdown Column -->
-                <div class="lg:col-span-7 bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700 flex flex-col space-y-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-outline/10 dark:border-slate-700 pb-3">
+                <div
+                    class="lg:col-span-7 bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700 flex flex-col space-y-4">
+                    <div
+                        class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-outline/10 dark:border-slate-700 pb-3">
                         <div>
                             <h2 class="font-heading font-semibold text-base">Distribusi Pos Kategori</h2>
-                            <p class="text-xs text-on-surface-variant dark:text-slate-400">Rincian proporsi arus kas per kategori</p>
+                            <p class="text-xs text-on-surface-variant dark:text-slate-400">Rincian proporsi arus kas per
+                                kategori</p>
                         </div>
                         <div class="flex items-center gap-1 bg-surface-container-low dark:bg-slate-700 p-1 rounded-lg">
-                            <button id="reports-cat-btn-expense" onclick="switchReportsCatType('expense')" class="px-3 py-1 text-xs font-semibold rounded-md bg-surface-container-lowest dark:bg-slate-800 text-error shadow-sm transition-all">Pengeluaran</button>
-                            <button id="reports-cat-btn-income" onclick="switchReportsCatType('income')" class="px-3 py-1 text-xs font-medium rounded-md text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:hover:text-slate-100 transition-all">Pemasukan</button>
+                            <button id="reports-cat-btn-expense" onclick="switchReportsCatType('expense')"
+                                class="px-3 py-1 text-xs font-semibold rounded-md bg-surface-container-lowest dark:bg-slate-800 text-error shadow-sm transition-all">Pengeluaran</button>
+                            <button id="reports-cat-btn-income" onclick="switchReportsCatType('income')"
+                                class="px-3 py-1 text-xs font-medium rounded-md text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:hover:text-slate-100 transition-all">Pemasukan</button>
                         </div>
                     </div>
-                    
+
                     <div id="reports-category-list" class="space-y-3 max-h-[420px] overflow-y-auto pr-1">
-                        <p class="text-sm text-on-surface-variant dark:text-slate-400 text-center py-8">Memuat analisis kategori...</p>
+                        <p class="text-sm text-on-surface-variant dark:text-slate-400 text-center py-8">Memuat analisis
+                            kategori...</p>
                     </div>
                 </div>
 
                 <!-- Wallet Reconciliation Column -->
-                <div class="lg:col-span-5 bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700 flex flex-col space-y-4">
+                <div
+                    class="lg:col-span-5 bg-surface-container-lowest dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-outline/5 dark:border-slate-700 flex flex-col space-y-4">
                     <div class="border-b border-outline/10 dark:border-slate-700 pb-3">
                         <h2 class="font-heading font-semibold text-base">Rekonsiliasi Arus Dompet</h2>
-                        <p class="text-xs text-on-surface-variant dark:text-slate-400">Perputaran dana keluar & masuk per rekening</p>
+                        <p class="text-xs text-on-surface-variant dark:text-slate-400">Perputaran dana keluar & masuk
+                            per rekening</p>
                     </div>
 
                     <div id="reports-wallet-reconciliation" class="space-y-3 max-h-[420px] overflow-y-auto pr-1">
-                        <p class="text-sm text-on-surface-variant dark:text-slate-400 text-center py-8">Memuat rekonsiliasi dompet...</p>
+                        <p class="text-sm text-on-surface-variant dark:text-slate-400 text-center py-8">Memuat
+                            rekonsiliasi dompet...</p>
                     </div>
                 </div>
             </div>
 
             <!-- 3. Export Center Banner -->
-            <div class="bg-gradient-to-r from-secondary/10 via-surface-container-lowest to-surface-container-lowest dark:from-secondary/20 dark:via-slate-800 dark:to-slate-800 p-5 rounded-xl border border-secondary/20 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div
+                class="bg-gradient-to-r from-secondary/10 via-surface-container-lowest to-surface-container-lowest dark:from-secondary/20 dark:via-slate-800 dark:to-slate-800 p-5 rounded-xl border border-secondary/20 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-xl bg-secondary/15 text-secondary flex items-center justify-center flex-shrink-0">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-secondary/15 text-secondary flex items-center justify-center flex-shrink-0">
                         <span class="material-symbols-outlined text-2xl">picture_as_pdf</span>
                     </div>
                     <div>
                         <h3 class="font-heading font-semibold text-base">Arsipkan Laporan Keuangan</h3>
-                        <p class="text-xs text-on-surface-variant dark:text-slate-400">Unduh dokumen resmi siap cetak (PDF) atau data mentah spreadsheet (CSV) untuk periode yang dipilih.</p>
+                        <p class="text-xs text-on-surface-variant dark:text-slate-400">Unduh dokumen resmi siap cetak
+                            (PDF) atau data mentah spreadsheet (CSV) untuk periode yang dipilih.</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2.5 w-full md:w-auto">
-                    <button onclick="exportData('pdf')" class="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-error text-white font-medium rounded-xl hover:opacity-90 transition-all text-xs shadow-sm active:scale-95">
+                    <button onclick="exportData('pdf')"
+                        class="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-error text-white font-medium rounded-xl hover:opacity-90 transition-all text-xs shadow-sm active:scale-95">
                         <span class="material-symbols-outlined text-sm">picture_as_pdf</span> Unduh PDF
                     </button>
-                    <button onclick="exportData('csv')" class="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-container dark:bg-slate-700 text-on-surface dark:text-slate-100 font-medium rounded-xl hover:bg-surface-container-high dark:hover:bg-slate-600 transition-all text-xs border border-outline/10 active:scale-95">
+                    <button onclick="exportData('csv')"
+                        class="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-container dark:bg-slate-700 text-on-surface dark:text-slate-100 font-medium rounded-xl hover:bg-surface-container-high dark:hover:bg-slate-600 transition-all text-xs border border-outline/10 active:scale-95">
                         <span class="material-symbols-outlined text-sm">description</span> Unduh CSV
                     </button>
                 </div>
@@ -425,9 +558,11 @@
 
         <!-- WALLETS -->
         <section id="wallets" class="page-section space-y-6">
-            <div class="flex items-center justify-between bg-surface-container-lowest dark:bg-slate-800 p-4 rounded-xl shadow-sm">
+            <div
+                class="flex items-center justify-between bg-surface-container-lowest dark:bg-slate-800 p-4 rounded-xl shadow-sm">
                 <h1 class="font-heading text-xl font-bold hidden md:block">Dompet & Rekening</h1>
-                <button onclick="openWalletModal()" class="flex items-center gap-2 px-4 py-2 bg-surface-container-low dark:bg-slate-700 text-on-surface dark:text-slate-100 rounded-lg font-medium hover:bg-surface-container dark:bg-slate-600 transition-colors w-full md:w-auto justify-center">
+                <button onclick="openWalletModal()"
+                    class="flex items-center gap-2 px-4 py-2 bg-surface-container-low dark:bg-slate-700 text-on-surface dark:text-slate-100 rounded-lg font-medium hover:bg-surface-container dark:bg-slate-600 transition-colors w-full md:w-auto justify-center">
                     <span class="material-symbols-outlined text-sm">add</span> Tambah Dompet
                 </button>
             </div>
@@ -436,14 +571,19 @@
             </div>
 
             <!-- Wallet Detail Subpage -->
-            <div id="wallet-detail" class="hidden mt-8 border-t border-outline/10 dark:border-slate-700 pt-8 animate-fade-in">
+            <div id="wallet-detail"
+                class="hidden mt-8 border-t border-outline/10 dark:border-slate-700 pt-8 animate-fade-in">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="font-heading text-lg font-bold" id="detail-wallet-name">Detail Dompet</h2>
-                    <button onclick="closeWalletDetail()" class="text-sm text-error font-medium flex items-center gap-1 hover:bg-error/10 px-2 py-1 rounded-md transition-colors"><span class="material-symbols-outlined text-sm">close</span> Tutup</button>
+                    <button onclick="closeWalletDetail()"
+                        class="text-sm text-error font-medium flex items-center gap-1 hover:bg-error/10 px-2 py-1 rounded-md transition-colors"><span
+                            class="material-symbols-outlined text-sm">close</span> Tutup</button>
                 </div>
-                <div class="bg-surface-container-lowest dark:bg-slate-800 rounded-xl shadow-sm p-5 border border-outline/5 dark:border-slate-700">
+                <div
+                    class="bg-surface-container-lowest dark:bg-slate-800 rounded-xl shadow-sm p-5 border border-outline/5 dark:border-slate-700">
                     <div id="wallet-detail-tx" class="flex flex-col divide-y divide-outline/5">
-                        <p class="text-sm text-on-surface-variant dark:text-slate-400 py-4 text-center">Memuat transaksi dompet ini...</p>
+                        <p class="text-sm text-on-surface-variant dark:text-slate-400 py-4 text-center">Memuat transaksi
+                            dompet ini...</p>
                     </div>
                 </div>
             </div>
@@ -451,16 +591,19 @@
 
         <!-- CATEGORIES -->
         <section id="categories" class="page-section space-y-6">
-            <div class="flex items-center justify-between bg-surface-container-lowest dark:bg-slate-800 p-4 rounded-xl shadow-sm">
+            <div
+                class="flex items-center justify-between bg-surface-container-lowest dark:bg-slate-800 p-4 rounded-xl shadow-sm">
                 <h1 class="font-heading text-xl font-bold hidden md:block">Kategori</h1>
-                <button onclick="openCategoryModal()" class="flex items-center gap-2 px-4 py-2 bg-surface-container-low dark:bg-slate-700 text-on-surface dark:text-slate-100 rounded-lg font-medium hover:bg-surface-container dark:bg-slate-600 transition-colors w-full md:w-auto justify-center">
+                <button onclick="openCategoryModal()"
+                    class="flex items-center gap-2 px-4 py-2 bg-surface-container-low dark:bg-slate-700 text-on-surface dark:text-slate-100 rounded-lg font-medium hover:bg-surface-container dark:bg-slate-600 transition-colors w-full md:w-auto justify-center">
                     <span class="material-symbols-outlined text-sm">add</span> Tambah Kategori
                 </button>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Pemasukan -->
-                <div class="bg-surface-container-lowest dark:bg-slate-800 rounded-xl shadow-sm p-5 border border-outline/5 dark:border-slate-700">
+                <div
+                    class="bg-surface-container-lowest dark:bg-slate-800 rounded-xl shadow-sm p-5 border border-outline/5 dark:border-slate-700">
                     <h2 class="font-heading font-semibold text-lg text-secondary mb-4 flex items-center gap-2">
                         <div class="w-8 h-8 rounded bg-secondary/10 flex items-center justify-center text-secondary">
                             <span class="material-symbols-outlined text-sm">arrow_downward</span>
@@ -471,7 +614,8 @@
                     </div>
                 </div>
                 <!-- Pengeluaran -->
-                <div class="bg-surface-container-lowest dark:bg-slate-800 rounded-xl shadow-sm p-5 border border-outline/5 dark:border-slate-700">
+                <div
+                    class="bg-surface-container-lowest dark:bg-slate-800 rounded-xl shadow-sm p-5 border border-outline/5 dark:border-slate-700">
                     <h2 class="font-heading font-semibold text-lg text-error mb-4 flex items-center gap-2">
                         <div class="w-8 h-8 rounded bg-error/10 flex items-center justify-center text-error">
                             <span class="material-symbols-outlined text-sm">arrow_upward</span>
@@ -487,197 +631,283 @@
     </main>
 
     <!-- Mobile Bottom Nav -->
-    <nav class="fixed bottom-0 left-0 right-0 h-16 bg-surface-container-lowest dark:bg-slate-800/90 backdrop-blur-lg border-t border-outline/10 dark:border-slate-700 flex md:hidden items-center justify-around z-40 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <button class="mobile-nav-btn active flex flex-col items-center text-on-surface-variant dark:text-slate-400 transition-colors" data-target="dashboard">
+    <nav
+        class="fixed bottom-0 left-0 right-0 h-16 bg-surface-container-lowest dark:bg-slate-800/90 backdrop-blur-lg border-t border-outline/10 dark:border-slate-700 flex md:hidden items-center justify-around z-40 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <button
+            class="mobile-nav-btn active flex flex-col items-center text-on-surface-variant dark:text-slate-400 transition-colors"
+            data-target="dashboard">
             <span class="material-symbols-outlined text-[24px]">dashboard</span>
             <span class="text-[10px] font-medium mt-0.5">Beranda</span>
         </button>
-        <button class="mobile-nav-btn flex flex-col items-center text-on-surface-variant dark:text-slate-400 transition-colors" data-target="transactions">
+        <button
+            class="mobile-nav-btn flex flex-col items-center text-on-surface-variant dark:text-slate-400 transition-colors"
+            data-target="transactions">
             <span class="material-symbols-outlined text-[24px]">list_alt</span>
             <span class="text-[10px] font-medium mt-0.5">Transaksi</span>
         </button>
-        <button class="mobile-nav-btn flex flex-col items-center text-on-surface-variant dark:text-slate-400 transition-colors" data-target="reports">
+        <button
+            class="mobile-nav-btn flex flex-col items-center text-on-surface-variant dark:text-slate-400 transition-colors"
+            data-target="reports">
             <span class="material-symbols-outlined text-[24px]">analytics</span>
             <span class="text-[10px] font-medium mt-0.5">Laporan</span>
         </button>
-        <button class="mobile-nav-btn flex flex-col items-center text-on-surface-variant dark:text-slate-400 transition-colors" data-target="wallets">
+        <button
+            class="mobile-nav-btn flex flex-col items-center text-on-surface-variant dark:text-slate-400 transition-colors"
+            data-target="wallets">
             <span class="material-symbols-outlined text-[24px]">account_balance_wallet</span>
             <span class="text-[10px] font-medium mt-0.5">Dompet</span>
         </button>
-        <button class="mobile-nav-btn flex flex-col items-center text-on-surface-variant dark:text-slate-400 transition-colors" data-target="categories">
+        <button
+            class="mobile-nav-btn flex flex-col items-center text-on-surface-variant dark:text-slate-400 transition-colors"
+            data-target="categories">
             <span class="material-symbols-outlined text-[24px]">category</span>
             <span class="text-[10px] font-medium mt-0.5">Kategori</span>
         </button>
     </nav>
 
     <!-- Mobile FAB -->
-    <button onclick="openTransactionModal()" class="fixed bottom-20 right-4 w-14 h-14 bg-primary text-white rounded-full shadow-xl flex md:hidden items-center justify-center z-50 hover:bg-primary/90 transition-all active:scale-95">
+    <button onclick="openTransactionModal()"
+        class="fixed bottom-20 right-4 w-14 h-14 bg-primary text-white rounded-full shadow-xl flex md:hidden items-center justify-center z-50 hover:bg-primary/90 transition-all active:scale-95">
         <span class="material-symbols-outlined text-3xl">add</span>
     </button>
 
     <!-- Loading Overlay (Subtle Sync Indicator) -->
-    <div id="loading-overlay" class="fixed bottom-24 md:bottom-10 right-4 z-[100] hidden items-center justify-center pointer-events-none transition-opacity duration-300">
-        <div class="bg-surface-container-lowest dark:bg-slate-800 p-3 rounded-full shadow-lg flex items-center gap-2 border border-outline/10 dark:border-slate-700">
+    <div id="loading-overlay"
+        class="fixed bottom-24 md:bottom-10 right-4 z-[100] hidden items-center justify-center pointer-events-none transition-opacity duration-300">
+        <div
+            class="bg-surface-container-lowest dark:bg-slate-800 p-3 rounded-full shadow-lg flex items-center gap-2 border border-outline/10 dark:border-slate-700">
             <span class="material-symbols-outlined animate-spin text-secondary text-sm">sync</span>
             <span class="font-medium text-xs">Sinkronisasi...</span>
         </div>
     </div>
 
     <!-- Toast Container -->
-    <div id="toast-container" class="fixed top-20 md:top-6 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+    <div id="toast-container" class="fixed top-20 md:top-6 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
+    </div>
 
     <!-- MODALS -->
-    
+
     <!-- Modal Transaksi -->
-    <div id="modal-transaction" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] hidden items-center justify-center p-4">
-        <div class="bg-surface-container-lowest dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div id="modal-transaction"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] hidden items-center justify-center p-4">
+        <div
+            class="bg-surface-container-lowest dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="p-4 border-b border-outline/10 dark:border-slate-700 flex items-center justify-between">
                 <h3 class="font-heading font-semibold text-lg" id="tx-modal-title">Catat Transaksi</h3>
-                <button onclick="closeModals()" class="text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:text-slate-100 p-1 rounded-full hover:bg-surface-container dark:bg-slate-600 transition-colors"><span class="material-symbols-outlined">close</span></button>
+                <button onclick="closeModals()"
+                    class="text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:text-slate-100 p-1 rounded-full hover:bg-surface-container dark:bg-slate-600 transition-colors"><span
+                        class="material-symbols-outlined">close</span></button>
             </div>
             <div class="p-4 overflow-y-auto">
                 <form id="form-transaction" class="space-y-4">
                     <input type="hidden" id="tx-id">
-                    
+
                     <div>
-                        <label class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Tipe</label>
+                        <label
+                            class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Tipe</label>
                         <div class="flex gap-2 text-[11px] sm:text-sm">
-                            <label class="flex-1 flex items-center justify-center gap-1 sm:gap-2 p-2 border border-outline/30 dark:border-slate-600 rounded-xl cursor-pointer bg-surface dark:bg-slate-900 transition-all has-[:checked]:bg-secondary/10 has-[:checked]:border-secondary has-[:checked]:text-secondary font-medium">
-                                <input type="radio" name="tx-type" value="income" class="hidden" checked onchange="updateCategoryOptions()">
-                                <span class="material-symbols-outlined text-[16px] sm:text-sm">arrow_downward</span> Pemasukan
+                            <label
+                                class="flex-1 flex items-center justify-center gap-1 sm:gap-2 p-2 border border-outline/30 dark:border-slate-600 rounded-xl cursor-pointer bg-surface dark:bg-slate-900 transition-all has-[:checked]:bg-secondary/10 has-[:checked]:border-secondary has-[:checked]:text-secondary font-medium">
+                                <input type="radio" name="tx-type" value="income" class="hidden" checked
+                                    onchange="updateCategoryOptions()">
+                                <span class="material-symbols-outlined text-[16px] sm:text-sm">arrow_downward</span>
+                                Pemasukan
                             </label>
-                            <label class="flex-1 flex items-center justify-center gap-1 sm:gap-2 p-2 border border-outline/30 dark:border-slate-600 rounded-xl cursor-pointer bg-surface dark:bg-slate-900 transition-all has-[:checked]:bg-error/10 has-[:checked]:border-error has-[:checked]:text-error font-medium">
-                                <input type="radio" name="tx-type" value="expense" class="hidden" onchange="updateCategoryOptions()">
-                                <span class="material-symbols-outlined text-[16px] sm:text-sm">arrow_upward</span> Pengeluaran
+                            <label
+                                class="flex-1 flex items-center justify-center gap-1 sm:gap-2 p-2 border border-outline/30 dark:border-slate-600 rounded-xl cursor-pointer bg-surface dark:bg-slate-900 transition-all has-[:checked]:bg-error/10 has-[:checked]:border-error has-[:checked]:text-error font-medium">
+                                <input type="radio" name="tx-type" value="expense" class="hidden"
+                                    onchange="updateCategoryOptions()">
+                                <span class="material-symbols-outlined text-[16px] sm:text-sm">arrow_upward</span>
+                                Pengeluaran
                             </label>
-                            <label class="flex-1 flex items-center justify-center gap-1 sm:gap-2 p-2 border border-outline/30 dark:border-slate-600 rounded-xl cursor-pointer bg-surface dark:bg-slate-900 transition-all has-[:checked]:bg-primary/10 has-[:checked]:border-primary has-[:checked]:text-primary font-medium">
-                                <input type="radio" name="tx-type" value="transfer" class="hidden" onchange="updateCategoryOptions()">
+                            <label
+                                class="flex-1 flex items-center justify-center gap-1 sm:gap-2 p-2 border border-outline/30 dark:border-slate-600 rounded-xl cursor-pointer bg-surface dark:bg-slate-900 transition-all has-[:checked]:bg-primary/10 has-[:checked]:border-primary has-[:checked]:text-primary font-medium">
+                                <input type="radio" name="tx-type" value="transfer" class="hidden"
+                                    onchange="updateCategoryOptions()">
                                 <span class="material-symbols-outlined text-[16px] sm:text-sm">sync_alt</span> Transfer
                             </label>
                         </div>
                     </div>
-                    
+
                     <div>
-                        <label class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Jumlah</label>
+                        <label
+                            class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Jumlah</label>
                         <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 font-medium text-on-surface-variant dark:text-slate-400">Rp</span>
-                            <input type="number" id="tx-amount" required class="w-full pl-9 pr-3 py-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors font-heading text-lg" placeholder="0">
+                            <span
+                                class="absolute left-3 top-1/2 -translate-y-1/2 font-medium text-on-surface-variant dark:text-slate-400">Rp</span>
+                            <input type="number" id="tx-amount" required
+                                class="w-full pl-9 pr-3 py-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors font-heading text-lg"
+                                placeholder="0">
                         </div>
                     </div>
-                    
+
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Tanggal</label>
-                            <input type="date" id="tx-date" required class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
+                            <label
+                                class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Tanggal</label>
+                            <input type="date" id="tx-date" required
+                                class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Waktu (Jam)</label>
-                            <input type="time" id="tx-time" required class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
+                            <label
+                                class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Waktu
+                                (Jam)</label>
+                            <input type="time" id="tx-time" required
+                                class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
                         </div>
                     </div>
-                    
+
                     <div>
-                        <label id="label-tx-wallet" class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Dompet</label>
-                        <select id="tx-wallet" required class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
+                        <label id="label-tx-wallet"
+                            class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Dompet</label>
+                        <select id="tx-wallet" required
+                            class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
                         </select>
                     </div>
-                    
+
                     <div id="container-tx-to-wallet" class="hidden">
-                        <label class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Dompet Tujuan</label>
-                        <select id="tx-to-wallet" class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
+                        <label
+                            class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Dompet
+                            Tujuan</label>
+                        <select id="tx-to-wallet"
+                            class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
                         </select>
                     </div>
-                    
+
                     <div id="container-tx-category">
-                        <label class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Kategori</label>
-                        <select id="tx-category" required class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
+                        <label
+                            class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Kategori</label>
+                        <select id="tx-category" required
+                            class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
                         </select>
                     </div>
-                    
+
                     <div>
-                        <label class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Catatan</label>
-                        <textarea id="tx-note" rows="2" class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm" placeholder="Opsional (mis: Makan siang)"></textarea>
+                        <label
+                            class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Catatan</label>
+                        <textarea id="tx-note" rows="2"
+                            class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm"
+                            placeholder="Opsional (mis: Makan siang)"></textarea>
                     </div>
                 </form>
             </div>
-            <div class="p-4 border-t border-outline/10 dark:border-slate-700 bg-surface dark:bg-slate-900 flex justify-end gap-3 mt-auto">
-                <button onclick="closeModals()" class="px-5 py-2.5 text-on-surface-variant dark:text-slate-400 font-medium hover:bg-surface-container dark:bg-slate-600 rounded-xl transition-colors text-sm">Batal</button>
-                <button onclick="saveTransaction()" class="px-5 py-2.5 bg-primary text-white font-medium rounded-xl hover:bg-primary/90 transition-all text-sm shadow-sm active:scale-95">Simpan</button>
+            <div
+                class="p-4 border-t border-outline/10 dark:border-slate-700 bg-surface dark:bg-slate-900 flex justify-end gap-3 mt-auto">
+                <button onclick="closeModals()"
+                    class="px-5 py-2.5 text-on-surface-variant dark:text-slate-400 font-medium hover:bg-surface-container dark:bg-slate-600 rounded-xl transition-colors text-sm">Batal</button>
+                <button onclick="saveTransaction()"
+                    class="px-5 py-2.5 bg-primary text-white font-medium rounded-xl hover:bg-primary/90 transition-all text-sm shadow-sm active:scale-95">Simpan</button>
             </div>
         </div>
     </div>
 
     <!-- Modal Dompet -->
-    <div id="modal-wallet" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] hidden items-center justify-center p-4">
-        <div class="bg-surface-container-lowest dark:bg-slate-800 w-full max-w-sm rounded-2xl shadow-xl overflow-hidden flex flex-col">
+    <div id="modal-wallet"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] hidden items-center justify-center p-4">
+        <div
+            class="bg-surface-container-lowest dark:bg-slate-800 w-full max-w-sm rounded-2xl shadow-xl overflow-hidden flex flex-col">
             <div class="p-4 border-b border-outline/10 dark:border-slate-700 flex items-center justify-between">
                 <h3 class="font-heading font-semibold text-lg" id="wallet-modal-title">Tambah Dompet</h3>
-                <button onclick="closeModals()" class="text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:text-slate-100 p-1 rounded-full hover:bg-surface-container dark:bg-slate-600 transition-colors"><span class="material-symbols-outlined">close</span></button>
+                <button onclick="closeModals()"
+                    class="text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:text-slate-100 p-1 rounded-full hover:bg-surface-container dark:bg-slate-600 transition-colors"><span
+                        class="material-symbols-outlined">close</span></button>
             </div>
             <div class="p-4">
                 <form id="form-wallet" class="space-y-4">
                     <input type="hidden" id="wallet-id">
                     <div>
-                        <label class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Nama Dompet</label>
-                        <input type="text" id="wallet-name" required class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm" placeholder="BCA / Tunai / Gopay">
+                        <label
+                            class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Nama
+                            Dompet</label>
+                        <input type="text" id="wallet-name" required
+                            class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm"
+                            placeholder="BCA / Tunai / Gopay">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Saldo Awal</label>
+                        <label
+                            class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Saldo
+                            Awal</label>
                         <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 font-medium text-on-surface-variant dark:text-slate-400 text-sm">Rp</span>
-                            <input type="number" id="wallet-balance" required class="w-full pl-9 pr-3 py-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm font-heading" placeholder="0">
+                            <span
+                                class="absolute left-3 top-1/2 -translate-y-1/2 font-medium text-on-surface-variant dark:text-slate-400 text-sm">Rp</span>
+                            <input type="number" id="wallet-balance" required
+                                class="w-full pl-9 pr-3 py-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm font-heading"
+                                placeholder="0">
                         </div>
                     </div>
                 </form>
             </div>
-            <div class="p-4 border-t border-outline/10 dark:border-slate-700 bg-surface dark:bg-slate-900 flex justify-end gap-3">
-                <button onclick="closeModals()" class="px-5 py-2 text-on-surface-variant dark:text-slate-400 font-medium hover:bg-surface-container dark:bg-slate-600 rounded-xl transition-colors text-sm">Batal</button>
-                <button onclick="saveWallet()" class="px-5 py-2 bg-primary text-white font-medium rounded-xl hover:bg-primary/90 transition-all text-sm shadow-sm active:scale-95">Simpan</button>
+            <div
+                class="p-4 border-t border-outline/10 dark:border-slate-700 bg-surface dark:bg-slate-900 flex justify-end gap-3">
+                <button onclick="closeModals()"
+                    class="px-5 py-2 text-on-surface-variant dark:text-slate-400 font-medium hover:bg-surface-container dark:bg-slate-600 rounded-xl transition-colors text-sm">Batal</button>
+                <button onclick="saveWallet()"
+                    class="px-5 py-2 bg-primary text-white font-medium rounded-xl hover:bg-primary/90 transition-all text-sm shadow-sm active:scale-95">Simpan</button>
             </div>
         </div>
     </div>
 
     <!-- Modal Kategori -->
-    <div id="modal-category" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] hidden items-center justify-center p-4">
-        <div class="bg-surface-container-lowest dark:bg-slate-800 w-full max-w-sm rounded-2xl shadow-xl overflow-hidden flex flex-col">
+    <div id="modal-category"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] hidden items-center justify-center p-4">
+        <div
+            class="bg-surface-container-lowest dark:bg-slate-800 w-full max-w-sm rounded-2xl shadow-xl overflow-hidden flex flex-col">
             <div class="p-4 border-b border-outline/10 dark:border-slate-700 flex items-center justify-between">
                 <h3 class="font-heading font-semibold text-lg" id="cat-modal-title">Tambah Kategori</h3>
-                <button onclick="closeModals()" class="text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:text-slate-100 p-1 rounded-full hover:bg-surface-container dark:bg-slate-600 transition-colors"><span class="material-symbols-outlined">close</span></button>
+                <button onclick="closeModals()"
+                    class="text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:text-slate-100 p-1 rounded-full hover:bg-surface-container dark:bg-slate-600 transition-colors"><span
+                        class="material-symbols-outlined">close</span></button>
             </div>
             <div class="p-4">
                 <form id="form-category" class="space-y-4">
                     <input type="hidden" id="cat-id">
                     <div>
-                        <label class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Tipe</label>
-                        <select id="cat-type" required class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
+                        <label
+                            class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Tipe</label>
+                        <select id="cat-type" required
+                            class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
                             <option value="income">Pemasukan</option>
                             <option value="expense">Pengeluaran</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Nama Kategori</label>
-                        <input type="text" id="cat-name" required class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm" placeholder="Makan / Gaji / Transportasi">
+                        <label
+                            class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Nama
+                            Kategori</label>
+                        <input type="text" id="cat-name" required
+                            class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm"
+                            placeholder="Makan / Gaji / Transportasi">
                     </div>
                 </form>
             </div>
-            <div class="p-4 border-t border-outline/10 dark:border-slate-700 bg-surface dark:bg-slate-900 flex justify-end gap-3">
-                <button onclick="closeModals()" class="px-5 py-2 text-on-surface-variant dark:text-slate-400 font-medium hover:bg-surface-container dark:bg-slate-600 rounded-xl transition-colors text-sm">Batal</button>
-                <button onclick="saveCategory()" class="px-5 py-2 bg-primary text-white font-medium rounded-xl hover:bg-primary/90 transition-all text-sm shadow-sm active:scale-95">Simpan</button>
+            <div
+                class="p-4 border-t border-outline/10 dark:border-slate-700 bg-surface dark:bg-slate-900 flex justify-end gap-3">
+                <button onclick="closeModals()"
+                    class="px-5 py-2 text-on-surface-variant dark:text-slate-400 font-medium hover:bg-surface-container dark:bg-slate-600 rounded-xl transition-colors text-sm">Batal</button>
+                <button onclick="saveCategory()"
+                    class="px-5 py-2 bg-primary text-white font-medium rounded-xl hover:bg-primary/90 transition-all text-sm shadow-sm active:scale-95">Simpan</button>
             </div>
         </div>
     </div>
 
     <!-- Modal Ekspor Laporan -->
-    <div id="modal-export" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] hidden items-center justify-center p-4">
-        <div class="bg-surface-container-lowest dark:bg-slate-800 w-full max-w-sm rounded-2xl shadow-xl overflow-hidden flex flex-col">
+    <div id="modal-export"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] hidden items-center justify-center p-4">
+        <div
+            class="bg-surface-container-lowest dark:bg-slate-800 w-full max-w-sm rounded-2xl shadow-xl overflow-hidden flex flex-col">
             <div class="p-4 border-b border-outline/10 dark:border-slate-700 flex items-center justify-between">
                 <h3 class="font-heading font-semibold text-lg">Ekspor Laporan</h3>
-                <button onclick="closeModals()" class="text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:text-slate-100 p-1 rounded-full hover:bg-surface-container dark:bg-slate-600 transition-colors"><span class="material-symbols-outlined">close</span></button>
+                <button onclick="closeModals()"
+                    class="text-on-surface-variant dark:text-slate-400 hover:text-on-surface dark:text-slate-100 p-1 rounded-full hover:bg-surface-container dark:bg-slate-600 transition-colors"><span
+                        class="material-symbols-outlined">close</span></button>
             </div>
             <div class="p-4 space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold mb-2 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Rentang Waktu</label>
-                    <select id="export-period" onchange="toggleCustomDateExport()" class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
+                    <label
+                        class="block text-xs font-semibold mb-2 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Rentang
+                        Waktu</label>
+                    <select id="export-period" onchange="toggleCustomDateExport()"
+                        class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
                         <option value="this_week">Pekan Ini</option>
                         <option value="this_month">Bulan Ini</option>
                         <option value="this_year">Tahun Ini</option>
@@ -686,21 +916,29 @@
                 </div>
                 <div id="export-custom-date" class="hidden grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Mulai</label>
-                        <input type="date" id="export-start" class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
+                        <label
+                            class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Mulai</label>
+                        <input type="date" id="export-start"
+                            class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Selesai</label>
-                        <input type="date" id="export-end" class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
+                        <label
+                            class="block text-xs font-semibold mb-1 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Selesai</label>
+                        <input type="date" id="export-end"
+                            class="w-full p-2.5 border border-outline/30 dark:border-slate-600 rounded-xl bg-surface dark:bg-slate-900 focus:outline-none focus:border-secondary transition-colors text-sm">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold mb-2 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Format Ekspor</label>
+                    <label
+                        class="block text-xs font-semibold mb-2 text-on-surface-variant dark:text-slate-400 uppercase tracking-wide">Format
+                        Ekspor</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <button onclick="exportData('csv')" class="flex items-center justify-center gap-2 p-3 border border-outline/30 dark:border-slate-600 rounded-xl hover:bg-surface-container dark:bg-slate-600 hover:border-secondary hover:text-secondary transition-colors font-medium text-sm">
+                        <button onclick="exportData('csv')"
+                            class="flex items-center justify-center gap-2 p-3 border border-outline/30 dark:border-slate-600 rounded-xl hover:bg-surface-container dark:bg-slate-600 hover:border-secondary hover:text-secondary transition-colors font-medium text-sm">
                             <span class="material-symbols-outlined text-lg">description</span> CSV
                         </button>
-                        <button onclick="exportData('pdf')" class="flex items-center justify-center gap-2 p-3 border border-outline/30 dark:border-slate-600 rounded-xl hover:bg-error/10 hover:border-error hover:text-error transition-colors font-medium text-sm">
+                        <button onclick="exportData('pdf')"
+                            class="flex items-center justify-center gap-2 p-3 border border-outline/30 dark:border-slate-600 rounded-xl hover:bg-error/10 hover:border-error hover:text-error transition-colors font-medium text-sm">
                             <span class="material-symbols-outlined text-lg">picture_as_pdf</span> PDF
                         </button>
                     </div>
@@ -711,4 +949,5 @@
 
     <script src="app.js?v=5.5"></script>
 </body>
+
 </html>
